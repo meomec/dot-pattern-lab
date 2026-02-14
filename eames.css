@@ -1,0 +1,777 @@
+/* =========================
+   Base layout
+   ========================= */
+:root {
+  --cycle-duration: 20s;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+}
+
+.controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.controls label {
+  margin-right: 10px;
+  font-weight: bold;
+  color: #333;
+}
+
+.controls select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.controls select:hover {
+  border-color: #999;
+}
+
+.pattern {
+  min-height: 100vh;
+}
+
+.pattern.single-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.motif {
+  display: inline-block;
+  margin: 10px;
+  break-inside: avoid;
+  margin-top: var(--motif-offset, 0px);
+  margin-bottom: var(--motif-bottom, 0px);
+  animation: float var(--float-duration, 5s) ease-in-out infinite;
+  animation-delay: var(--animation-delay, 0s);
+  transform-origin: center;
+  overflow: visible;
+}
+
+.motif.mirror-x {
+  scale: -1 1;
+}
+
+.motif.mirror-y {
+  scale: 1 -1;
+}
+
+.motif.mirror-x.mirror-y {
+  scale: -1 -1;
+}
+
+.motif svg {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  overflow: visible;
+  transform-origin: center;
+  animation: presence var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: var(--bloom-delay, 0s);
+  animation-fill-mode: both;
+  display: block;
+}
+
+.motif.color svg path {
+  fill: currentColor;
+}
+
+.color.yellow {
+  color: #CC8F3C;
+}
+
+.color.yellow {
+  color: #C22B2B;
+}
+
+.color.blue {
+  color: #0F2D8E;
+}
+
+.color.light-green {
+  color: #829658;
+}
+
+.color.dark-green {
+  color: #325042;
+}
+
+.color.pink {
+  color: #F0C1CB;
+}
+
+.color.black {
+  color: #151515;
+}
+
+
+
+
+
+
+/* =========================
+   Global keyframes
+   ========================= */
+@keyframes presence {
+  0% {
+    transform: scale(0.05) rotate(6deg) translate(0px, 0px);
+    opacity: 0;
+  }
+  10% {
+    transform: scale(1) rotate(3deg) translate(2px, -3px);
+    opacity: 0.5;
+  }
+  30% {
+    transform: scale(1) rotate(3deg) translate(-2px, 2px);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.05) rotate(1deg) translate(1px, -2px);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1) rotate(0deg) translate(0px, 0px);
+    opacity: 1;
+  }
+  90% {
+    transform: scale(1) rotate(-1deg) translate(2px, -3px);
+    opacity: 1;
+  }
+  92% {
+    transform: scale(1) rotate(-2deg) translate(-2px, 2px);
+    opacity: 0.5;
+  }
+  95% {
+    transform: scale(0.05) rotate(-3deg) translate(1px, -2px);
+    opacity: 0.5;
+  }
+  99% {
+    transform: scale(0.05) rotate(-3deg) translate(0px, 0px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.05) rotate(-6deg) translate(0px, 0px);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  0%   { transform: translate(0px, 0px) rotate(0deg); }
+  25%  { transform: translate(2px, -3px) rotate(2deg); }
+  50%  { transform: translate(-2px, 2px) rotate(-0.5deg); }
+  75%  { transform: translate(1px, -2px) rotate(0.5deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+@keyframes bloom {
+  0% {
+    transform: scale(0.05) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    transform: scale(1) rotate(3deg);
+    opacity: 0.5;
+  }
+  30% {
+    transform: scale(1) rotate(3deg);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.05) rotate(1deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  90% {
+    transform: scale(1) rotate(-1deg);
+    opacity: 1;
+  }
+  92% {
+    transform: scale(1) rotate(-2deg);
+    opacity: 0.5;
+  }
+  95% {
+    transform: scale(0.05) rotate(-3deg);
+    opacity: 0.5;
+  }
+  99% {
+    transform: scale(0.05) rotate(-3deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.05) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+/* =========================
+   Generic growth model
+   ========================= */
+[class^="motif-type-"] #disc1 {
+  opacity: 0;
+  transform-origin: center;
+  animation: gGrowDisc1 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+}
+
+[class^="motif-type-"] #tree {
+  opacity: 0;
+  transform-origin: center;
+  animation: gGrowTree var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+}
+
+[class^="motif-type-"] [id^="disc"]:not(#disc1) {
+  opacity: 0;
+  transform-origin: center;
+  animation: gGrowDiscBourgeon var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+}
+
+@keyframes gGrowDisc1 {
+  0%   { opacity: 0; transform: scale(0.05); }
+  8%   { opacity: 1; transform: scale(1); }
+  96%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes gGrowTree {
+  0%   { opacity: 0; transform: scaleY(0.05); }
+  12%  { opacity: 1; transform: scaleY(1); }
+  92%  { opacity: 1; transform: scaleY(1); }
+  98%  { opacity: 0; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+
+@keyframes gGrowDiscBourgeon {
+  0%   { opacity: 0; transform: scale(0.05); }
+  24%  { opacity: 1; transform: scale(1); }
+  76%  { opacity: 1; transform: scale(1); }
+  84%  { opacity: 0; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* =========================
+   Shared collapse utility
+   ========================= */
+.assembly-collapse {
+  transform-box: fill-box;
+  transform-origin: var(--assembly-origin, center center);
+  animation: assemblyCollapse var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: var(--bloom-delay, 0s);
+  animation-fill-mode: both;
+}
+
+@keyframes assemblyCollapse {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  2.5% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  3.5% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  97% {
+    opacity: 1;
+    transform: scale(var(--assembly-pop-scale, 1.08));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+/* =========================
+   Motif 1 overrides (eames_01)
+   ========================= */
+.motif-type-1 {
+  --m1-tree-origin: 61.1px 23.2px;
+  --m1-disc1-origin: 61.1px 23.2px;
+  --m1-disc2-origin: 41.1px 51.6px;
+  --m1-disc3-origin: 88.5px 48.6px;
+  --m1-disc4-origin: 21.7px 145.5px;
+  --m1-disc5-origin: 109.8px 138.7px;
+  --m1-disc6-origin: 67px 175.9px;
+  --m1-branch1-origin: top center;
+  --m1-branch2-origin: right center;
+  --m1-branch3-origin: left center;
+  --m1-branch4-origin: right center;
+  --m1-branch5-origin: left center;
+  --assembly-origin: center center;
+  --assembly-pop-scale: 1.05;
+}
+
+.motif-type-1 svg {
+  animation: none;
+  opacity: 1;
+}
+
+.motif-type-1 #disc1 {
+  transform-origin: var(--m1-disc1-origin);
+  animation: m1GrowDisc1 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) 1;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-1 #tree {
+  animation: none !important;
+  transform-origin: var(--m1-tree-origin) !important;
+  opacity: 1;
+}
+
+.motif-type-1 #disc2 {
+  transform-origin: var(--m1-disc2-origin);
+}
+
+.motif-type-1 #disc3 {
+  transform-origin: var(--m1-disc3-origin);
+}
+
+.motif-type-1 #disc4 {
+  transform-origin: var(--m1-disc4-origin);
+}
+
+.motif-type-1 #disc5 {
+  transform-origin: var(--m1-disc5-origin);
+}
+
+.motif-type-1 #disc6 {
+  transform-origin: var(--m1-disc6-origin);
+}
+
+.motif-type-1 #branch1 {
+  transform-box: fill-box;
+  transform-origin: var(--m1-branch1-origin);
+  animation: m1GrowBranchY var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-1 #branch2 {
+  transform-box: fill-box;
+  transform-origin: var(--m1-branch2-origin);
+  animation: m1GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-1 #branch3 {
+  transform-box: fill-box;
+  transform-origin: var(--m1-branch3-origin);
+  animation: m1GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-1 #branch4 {
+  transform-box: fill-box;
+  transform-origin: var(--m1-branch4-origin);
+  animation: m1GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-1 #branch5 {
+  transform-box: fill-box;
+  transform-origin: var(--m1-branch5-origin);
+  animation: m1GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-1 #disc2,
+.motif-type-1 #disc3,
+.motif-type-1 #disc4,
+.motif-type-1 #disc5,
+.motif-type-1 #disc6 {
+  animation: m1GrowDiscBourgeon var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+@keyframes m1GrowDisc1 {
+  0%   { opacity: 0; transform: scale(0.05); }
+  8%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes m1GrowTree {
+  0%   { opacity: 0; transform: scaleX(0.05) scaleY(0.05); }
+  12%  { opacity: 1; transform: scaleX(0.05) scaleY(1); }
+  24%  { opacity: 1; transform: scaleX(1) scaleY(1); }
+  70%  { opacity: 1; transform: scaleX(1) scaleY(1); }
+  82%  { opacity: 1; transform: scaleX(0.05) scaleY(1); }
+  90%  { opacity: 0; transform: scaleX(0.05) scaleY(0.05); }
+  100% { opacity: 0; transform: scaleX(0.05) scaleY(0.05); }
+}
+
+@keyframes m1GrowDiscBourgeon {
+  0%   { opacity: 0; transform: scale(0.05); }
+  12%  { opacity: 1; transform: scale(1); }
+  97%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes m1GrowBranchY {
+  0%   { opacity: 0; transform: scaleY(0.05); }
+  3.5% { opacity: 1; transform: scaleY(1); }
+  97%  { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+
+@keyframes m1GrowBranchX {
+  0%   { opacity: 0; transform: scaleX(0.05); }
+  3.5% { opacity: 1; transform: scaleX(1); }
+  97%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+/* =========================
+   Motif 2 overrides (eames_02)
+   ========================= */
+.motif-type-2 {
+  --m2-disc1-origin: 51.1px 119.4px;
+  --m2-disc2-origin: 111.668px 73.647px;
+  --m2-disc3-origin: 19.475px 77.845px;
+  --m2-disc4-origin: 52.351px 22.547px;
+  --m2-branch1-origin: 51.079px 113.015px;
+  --m2-branch2-origin: left center;
+  --m2-branch3-origin: right center;
+  --assembly-origin: center center;
+  --assembly-pop-scale: 1.05;
+}
+
+.motif-type-2 svg {
+  animation: none;
+  opacity: 1;
+}
+
+.motif-type-2 #disc1 {
+  transform-origin: var(--m2-disc1-origin);
+  animation: m2GrowDisc1 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) 1;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-2 #tree {
+  animation: none !important;
+  opacity: 1;
+}
+
+.motif-type-2 #branch1 {
+  transform-box: fill-box;
+  transform-origin: var(--m2-branch1-origin);
+  animation: m2GrowBranchY var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-2 #branch2 {
+  transform-box: fill-box;
+  transform-origin: var(--m2-branch2-origin);
+  animation: m2GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-2 #branch3 {
+  transform-box: fill-box;
+  transform-origin: var(--m2-branch3-origin);
+  animation: m2GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-2 #disc2 {
+  transform-box: view-box;
+  transform-origin: var(--m2-disc2-origin);
+}
+
+.motif-type-2 #disc3 {
+  transform-box: view-box;
+  transform-origin: var(--m2-disc3-origin);
+}
+
+.motif-type-2 #disc4 {
+  transform-box: view-box;
+  transform-origin: var(--m2-disc4-origin);
+}
+
+.motif-type-2 #disc2,
+.motif-type-2 #disc3,
+.motif-type-2 #disc4 {
+  animation: m2GrowDiscBourgeon var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+@keyframes m2GrowDisc1 {
+  0%   { opacity: 0; transform: scale(0.05); }
+  8%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes m2GrowBranchY {
+  0%   { opacity: 0; transform: scaleY(0.05); }
+  3.5% { opacity: 1; transform: scaleY(1); }
+  97%  { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+
+@keyframes m2GrowBranchX {
+  0%   { opacity: 0; transform: scaleX(0.05); }
+  3.5% { opacity: 1; transform: scaleX(1); }
+  97%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+@keyframes m2GrowDiscBourgeon {
+  0%   { opacity: 0; transform: scale(0.05); }
+  12%  { opacity: 1; transform: scale(1); }
+  97%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* =========================
+   Motif 6 overrides
+   ========================= */
+.motif-type-6 {
+  --m6-disc1-origin: 30.368px 44.093px;
+  --m6-tree-origin: left center;
+  --m6-disc2-origin: bottom center;
+  --m6-disc3-origin: top center;
+  --m6-branch1-origin: left center;
+  --m6-branch2-origin: bottom center;
+  --m6-branch3-origin: top center;
+  --assembly-origin: center center;
+  --assembly-pop-scale: 1.08;
+}
+
+.motif-type-6 svg {
+  animation: none;
+  opacity: 1;
+}
+
+.motif-type-6 #disc1 {
+  transform-origin: var(--m6-disc1-origin);
+  animation: m6GrowDisc1 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) 1;
+  animation-delay: var(--bloom-delay, 0s);
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-6 #tree {
+  animation: none;
+  opacity: 1;
+}
+
+.motif-type-6 #branch1 {
+  transform-box: fill-box;
+  transform-origin: var(--m6-branch1-origin);
+  animation: m6GrowBranch1 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-6 #branch2 {
+  transform-box: fill-box;
+  transform-origin: var(--m6-branch2-origin);
+  animation: m6GrowBranch2 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-6 #branch3 {
+  transform-box: fill-box;
+  transform-origin: top center !important;
+  animation: m6GrowBranch3 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-6 #disc2 {
+  transform-box: fill-box;
+  transform-origin: var(--m6-disc2-origin);
+  animation: m6GrowDisc2 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: calc(var(--bloom-delay, 0s) + 4s);
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-6 #disc3 {
+  transform-box: fill-box;
+  transform-origin: var(--m6-disc3-origin);
+  animation: m6GrowDisc3 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: calc(var(--bloom-delay, 0s) + 4s);
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+@keyframes m6GrowDisc1 {
+  0% {
+    opacity: 0;
+    transform: scale(0.05);
+  }
+  3.5% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes m6GrowTree {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.05) scaleY(0.05);
+  }
+  12% {
+    opacity: 1;
+    transform: scaleX(1) scaleY(0.05);
+  }
+  24% {
+    opacity: 1;
+    transform: scaleX(1) scaleY(1);
+  }
+  70% {
+    opacity: 1;
+    transform: scaleX(1) scaleY(1);
+  }
+  75% {
+    opacity: 1;
+    transform: scaleX(1) scaleY(0.05);
+  }
+  85% {
+    opacity: 0;
+    transform: scaleX(0.05) scaleY(0.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(0.05) scaleY(0.05);
+  }
+}
+
+@keyframes m6GrowBranch1 {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.05);
+  }
+  3.5% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  97% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes m6GrowBranch2 {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+  3.5% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  97% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes m6GrowBranch3 {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+  3.5% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  97% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes m6GrowDisc2 {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+  4.5% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  97% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes m6GrowDisc3 {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+  4.5% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  97% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(1);
+  }
+}
