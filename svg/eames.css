@@ -694,6 +694,113 @@ body {
 }
 
 /* =========================
+   Motif 4 overrides (eames_04)
+   ========================= */
+.motif-type-4 {
+  --m4-disc1-origin: 56.3px 20.5px;
+  --m4-disc2-origin: 90px 69.2px;
+  --m4-disc3-origin: 59.1px 109.4px;
+  --m4-disc4-origin: 22.8px 73.9px;
+  --m4-branch1-origin: 57px 71px;
+  --m4-branch2-origin: var(--m4-disc1-origin);
+  --m4-branch3-origin: 55px 71px;
+  --assembly-origin: center center;
+  --assembly-pop-scale: 1.08;
+}
+
+.motif-type-4 svg {
+  animation: none;
+  opacity: 1;
+}
+
+.motif-type-4 #disc1 {
+  transform-box: view-box;
+  transform-origin: var(--m4-disc1-origin);
+  animation: m4GrowDisc1 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) 1;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-4 #tree {
+  animation: none !important;
+  opacity: 1;
+}
+
+.motif-type-4 #branch1 {
+  transform-box: view-box;
+  transform-origin: var(--m4-branch1-origin);
+  animation: m4GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-4 #branch2 {
+  transform-box: view-box;
+  transform-origin: var(--m4-branch2-origin);
+  animation: m4GrowBranchY var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-4 #branch3 {
+  transform-box: view-box;
+  transform-origin: var(--m4-branch3-origin);
+  animation: m4GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+.motif-type-4 #disc2 {
+  transform-box: view-box;
+  transform-origin: var(--m4-disc2-origin);
+}
+
+.motif-type-4 #disc3 {
+  transform-box: view-box;
+  transform-origin: var(--m4-disc3-origin);
+}
+
+.motif-type-4 #disc4 {
+  transform-box: view-box;
+  transform-origin: var(--m4-disc4-origin);
+}
+
+.motif-type-4 #disc2,
+.motif-type-4 #disc3,
+.motif-type-4 #disc4 {
+  animation: m4GrowDiscBourgeon var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-fill-mode: both;
+  opacity: 0;
+}
+
+@keyframes m4GrowDisc1 {
+  0%   { opacity: 0; transform: scale(0.05); }
+  8%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes m4GrowBranchY {
+  0%   { opacity: 0; transform: scaleY(0.05); }
+  3.5% { opacity: 1; transform: scaleY(1); }
+  97%  { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+
+@keyframes m4GrowBranchX {
+  0%   { opacity: 0; transform: scaleX(0.05); }
+  3.5% { opacity: 1; transform: scaleX(1); }
+  97%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+@keyframes m4GrowDiscBourgeon {
+  0%   { opacity: 0; transform: scale(0.05); }
+  12%  { opacity: 1; transform: scale(1); }
+  97%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+/* =========================
    Motif 6 overrides
    ========================= */
 .motif-type-6 {
