@@ -568,12 +568,17 @@
             });
         }
 
-        function conflictsWithNearbyStyles(candidate, placed, adjacencyRadius) {
+        function conflictsWithNearbyStyles(candidate, placed, adjacencyMultiplier) {
             for (let i = 0; i < placed.length; i += 1) {
                 const other = placed[i];
                 const dx = candidate.x - other.x;
                 const dy = candidate.y - other.y;
                 const distance = Math.hypot(dx, dy);
+
+                const pairBaseRadius = (
+                    (candidate.width + other.width + candidate.height + other.height) / 4
+                );
+                const adjacencyRadius = pairBaseRadius * adjacencyMultiplier;
 
                 if (distance > adjacencyRadius) continue;
 
@@ -603,12 +608,7 @@
         function placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight) {
             const placed = [];
             const marginRatios = [0.22, 0.16, 0.11, 0.07, 0.035, 0];
-            const avgFootprint = clones.reduce((sum, clone) => {
-                const width = parseFloat(clone.style.width) || 80;
-                const height = parseFloat(clone.style.height) || 80;
-                return sum + ((width + height) / 2);
-            }, 0) / Math.max(1, clones.length);
-            const adjacencyRadii = [2.2, 1.9, 1.65, 1.4, 1.15, 0.95].map((scale) => avgFootprint * scale);
+            const adjacencyMultipliers = [1.2, 1.05, 0.9, 0.78, 0.66, 0.55];
 
             clones.forEach((clone) => {
                 const width = parseFloat(clone.style.width) || 80;
@@ -625,7 +625,7 @@
 
                 for (let level = 0; level < marginRatios.length && !selectedPoint; level += 1) {
                     const marginRatio = marginRatios[level];
-                    const adjacencyRadius = adjacencyRadii[level];
+                    const adjacencyMultiplier = adjacencyMultipliers[level];
 
                     for (let attempt = 0; attempt < 260; attempt += 1) {
                         const x = minX + Math.random() * (maxX - minX || 1);
@@ -633,7 +633,7 @@
                         const candidate = { x, y, width, height, motifIndex, colorClass };
 
                         if (intersectsPlaced(candidate, placed, marginRatio)) continue;
-                        if (conflictsWithNearbyStyles(candidate, placed, adjacencyRadius)) continue;
+                        if (conflictsWithNearbyStyles(candidate, placed, adjacencyMultiplier)) continue;
 
                         selectedPoint = candidate;
                         break;
