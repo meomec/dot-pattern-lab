@@ -43,7 +43,10 @@ body {
 }
 
 .pattern {
+  position: relative;
   min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
 }
 
 .pattern.single-view {
@@ -51,18 +54,25 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  overflow: visible;
 }
 
 .motif {
-  display: inline-block;
-  margin: 10px;
-  break-inside: avoid;
-  margin-top: var(--motif-offset, 0px);
-  margin-bottom: var(--motif-bottom, 0px);
+  position: absolute;
+  left: var(--motif-left, 0px);
+  top: var(--motif-top, 0px);
+  transform: translate(-50%, -50%);
   animation: float var(--float-duration, 5s) ease-in-out infinite;
   animation-delay: var(--animation-delay, 0s);
   transform-origin: center;
   overflow: visible;
+}
+
+.pattern.single-view .motif {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
 }
 
 .motif.mirror-x {

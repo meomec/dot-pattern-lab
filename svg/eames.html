@@ -175,14 +175,15 @@
     </div>
 
     <script>
-        const N = 50;
-        const gridScale = 0.75;
+        const DEFAULT_CLONE_COUNT = 200;
+        const DEFAULT_GRID_SCALE = 0.25;
         const selector = document.getElementById('motif-selector');
         const pattern = document.querySelector('.pattern');
         const motifTemplates = Array.from(document.querySelectorAll('.motif'));
         const frequencies = motifTemplates.map((motif) => parseFloat(motif.dataset.frequency) || 1);
         const cloneResetEntries = [];
         let resetSchedulerId = null;
+        let resizeReflowTimerId = null;
         const colorFrequencies = {
             yellow: 0.1,
             red: 0.1,
@@ -193,6 +194,52 @@
             black: 0.4,
         };
         const colorClasses = Object.keys(colorFrequencies);
+
+        function parsePositiveInt(value, fallbackValue) {
+            const parsed = parseInt(value || '', 10);
+            if (!Number.isFinite(parsed) || parsed <= 0) return fallbackValue;
+            return parsed;
+        }
+
+        function parseGridScale(value, fallbackValue) {
+            const parsed = parseFloat(value || '');
+            if (!Number.isFinite(parsed)) return fallbackValue;
+            return Math.min(1.2, Math.max(0.05, parsed));
+        }
+
+        function parseBooleanQuery(value, fallbackValue = false) {
+            if (value == null) return fallbackValue;
+            const normalized = String(value).trim().toLowerCase();
+            if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+            if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+            return fallbackValue;
+        }
+
+        function parseColorMode(value) {
+            const normalized = String(value || '').trim().toLowerCase();
+            if (['black', 'noir'].includes(normalized)) return 'black';
+            return 'color';
+        }
+
+        const queryParams = new URLSearchParams(window.location.search);
+        const runtimeConfig = {
+            cloneCount: parsePositiveInt(queryParams.get('n'), DEFAULT_CLONE_COUNT),
+            gridScale: parseGridScale(queryParams.get('gridScale') || queryParams.get('scale'), DEFAULT_GRID_SCALE),
+            colorMode: parseColorMode(queryParams.get('colorMode') || queryParams.get('color') || queryParams.get('couleur')),
+            debugPlacement: parseBooleanQuery(queryParams.get('debug'), false),
+        };
+
+        function getActiveColorClasses() {
+            if (runtimeConfig.colorMode === 'black') return ['black'];
+            return colorClasses;
+        }
+
+        function getActiveColorWeight(colorClass) {
+            if (runtimeConfig.colorMode === 'black') {
+                return colorClass === 'black' ? 1 : 0;
+            }
+            return colorFrequencies[colorClass] || 0;
+        }
 
         function clearCycleTimers() {
             cloneResetEntries.length = 0;
@@ -266,45 +313,361 @@
             return frequencies.length - 1;
         }
 
+        function getWeightedRandomIndexExcluding(excludedIndices = []) {
+            const excluded = new Set(excludedIndices);
+            const allowed = frequencies
+                .map((frequency, index) => ({ index, frequency }))
+                .filter((item) => !excluded.has(item.index) && item.frequency > 0);
+
+            if (allowed.length === 0) {
+                return getWeightedRandomIndex();
+            }
+
+            const totalFrequency = allowed.reduce((sum, item) => sum + item.frequency, 0);
+            let random = Math.random() * totalFrequency;
+
+            for (const item of allowed) {
+                random -= item.frequency;
+                if (random <= 0) return item.index;
+            }
+
+            return allowed[allowed.length - 1].index;
+        }
+
         function getWeightedRandomColorClass() {
-            const totalFrequency = colorClasses.reduce((sum, colorClass) => {
-                return sum + (colorFrequencies[colorClass] || 0);
+            const activeColorClasses = getActiveColorClasses();
+            const totalFrequency = activeColorClasses.reduce((sum, colorClass) => {
+                return sum + getActiveColorWeight(colorClass);
             }, 0);
 
             let random = Math.random() * totalFrequency;
-            for (const colorClass of colorClasses) {
-                random -= colorFrequencies[colorClass] || 0;
+            for (const colorClass of activeColorClasses) {
+                random -= getActiveColorWeight(colorClass);
                 if (random <= 0) return colorClass;
             }
 
-            return colorClasses[0];
+            return activeColorClasses[0] || 'black';
         }
 
-        function applyCloneBaseStyle(clone, bloomDelay) {
+        function getWeightedRandomColorClassExcluding(excludedColorClasses = []) {
+            const excluded = new Set(excludedColorClasses);
+            const activeColorClasses = getActiveColorClasses();
+            const allowed = activeColorClasses.filter((colorClass) => !excluded.has(colorClass) && getActiveColorWeight(colorClass) > 0);
+
+            if (allowed.length === 0) {
+                return getWeightedRandomColorClass();
+            }
+
+            const totalFrequency = allowed.reduce((sum, colorClass) => {
+                return sum + getActiveColorWeight(colorClass);
+            }, 0);
+
+            let random = Math.random() * totalFrequency;
+            for (const colorClass of allowed) {
+                random -= getActiveColorWeight(colorClass);
+                if (random <= 0) return colorClass;
+            }
+
+            return allowed[allowed.length - 1];
+        }
+
+        function applyCloneBaseStyle(clone, bloomDelay, colorClass) {
             const cycleDuration = getCycleDurationSeconds();
             const randomDelay = Math.random() * (cycleDuration * 0.15);
             const randomDuration = cycleDuration * (0.5 + Math.random() * 0.3);
-            const randomOffset = (Math.random() - 0.5) * 60;
-            const randomBottom = 10 + Math.random() * 10;
             const randomMirrorX = Math.random() < 0.5;
             const randomMirrorY = Math.random() < 0.5;
             const allowMirroring = !clone.classList.contains('motif-type-2');
-            const randomColorClass = getWeightedRandomColorClass();
+            const assignedColorClass = colorClass || getWeightedRandomColorClass();
             const width = parseFloat(clone.dataset.dimensionW);
             const height = parseFloat(clone.dataset.dimensionH);
 
             clone.style.setProperty('--bloom-delay', `${bloomDelay}s`);
             clone.style.setProperty('--animation-delay', `${randomDelay}s`);
             clone.style.setProperty('--float-duration', `${randomDuration}s`);
-            clone.style.setProperty('--motif-offset', `${randomOffset}px`);
-            clone.style.setProperty('--motif-bottom', `${randomBottom}px`);
+            clone.style.setProperty('--motif-left', '0px');
+            clone.style.setProperty('--motif-top', '0px');
             clone.classList.toggle('mirror-x', allowMirroring && randomMirrorX);
             clone.classList.toggle('mirror-y', allowMirroring && randomMirrorY);
             clone.classList.add('color');
             clone.classList.remove(...colorClasses);
-            clone.classList.add(randomColorClass);
-            clone.style.width = `${width * gridScale}px`;
-            clone.style.height = `${height * gridScale}px`;
+            clone.classList.add(assignedColorClass);
+            clone.style.width = `${width * runtimeConfig.gridScale}px`;
+            clone.style.height = `${height * runtimeConfig.gridScale}px`;
+
+            if (runtimeConfig.debugPlacement) {
+                clone.style.outline = '1px dashed rgba(0,0,0,0.35)';
+                clone.style.outlineOffset = '2px';
+            }
+        }
+
+        function getPatternViewport() {
+            const bodyStyles = getComputedStyle(document.body);
+            const bodyPaddingTop = parseFloat(bodyStyles.paddingTop) || 0;
+            const bodyPaddingBottom = parseFloat(bodyStyles.paddingBottom) || 0;
+            const viewportHeight = Math.max(520, window.innerHeight - bodyPaddingTop - bodyPaddingBottom);
+
+            pattern.style.height = `${viewportHeight}px`;
+            const width = Math.max(320, pattern.clientWidth || window.innerWidth);
+
+            return { width, height: viewportHeight };
+        }
+
+        function getGridShape(targetCount, viewportWidth, viewportHeight) {
+            const aspect = viewportWidth / Math.max(1, viewportHeight);
+            const cols = Math.max(4, Math.round(Math.sqrt(targetCount * aspect)));
+            const rows = Math.max(3, Math.ceil(targetCount / cols));
+            return { cols, rows };
+        }
+
+        function buildWeightedQuotaMap(entries, totalCount) {
+            const safeEntries = entries.map((entry) => ({
+                key: entry.key,
+                weight: Math.max(0, Number(entry.weight) || 0),
+            }));
+
+            const totalWeight = safeEntries.reduce((sum, entry) => sum + entry.weight, 0);
+            const fallbackWeight = safeEntries.length > 0 ? 1 / safeEntries.length : 0;
+
+            const raw = safeEntries.map((entry) => {
+                const normalizedWeight = totalWeight > 0 ? entry.weight / totalWeight : fallbackWeight;
+                const exact = normalizedWeight * totalCount;
+                return {
+                    key: entry.key,
+                    count: Math.floor(exact),
+                    remainder: exact - Math.floor(exact),
+                };
+            });
+
+            let assigned = raw.reduce((sum, entry) => sum + entry.count, 0);
+            let remaining = Math.max(0, totalCount - assigned);
+
+            raw.sort((a, b) => b.remainder - a.remainder);
+            let cursor = 0;
+            while (remaining > 0 && raw.length > 0) {
+                raw[cursor % raw.length].count += 1;
+                cursor += 1;
+                remaining -= 1;
+            }
+
+            const quota = new Map();
+            raw.forEach((entry) => {
+                quota.set(entry.key, entry.count);
+            });
+
+            return quota;
+        }
+
+        function pickKeyFromQuota(quotaMap, excludedKeys = []) {
+            const excluded = new Set(excludedKeys);
+
+            const allowed = [];
+            const fallback = [];
+
+            quotaMap.forEach((count, key) => {
+                if (count <= 0) return;
+                const target = excluded.has(key) ? fallback : allowed;
+                target.push({ key, count });
+            });
+
+            const pool = allowed.length > 0 ? allowed : fallback;
+            if (pool.length === 0) return null;
+
+            const total = pool.reduce((sum, item) => sum + item.count, 0);
+            let random = Math.random() * total;
+
+            for (const item of pool) {
+                random -= item.count;
+                if (random <= 0) return item.key;
+            }
+
+            return pool[pool.length - 1].key;
+        }
+
+        function buildClonePlan(cellCount, cols) {
+            const plan = [];
+            const activeColorClasses = getActiveColorClasses();
+
+            const motifQuota = buildWeightedQuotaMap(
+                frequencies.map((weight, index) => ({ key: index, weight })),
+                cellCount,
+            );
+
+            const colorQuota = buildWeightedQuotaMap(
+                activeColorClasses.map((colorClass) => ({ key: colorClass, weight: getActiveColorWeight(colorClass) })),
+                cellCount,
+            );
+
+            const enforceColorAdjacency = activeColorClasses.length > 1;
+
+            for (let index = 0; index < cellCount; index += 1) {
+                const col = index % cols;
+                const row = Math.floor(index / cols);
+
+                const leftIndex = col > 0 ? index - 1 : -1;
+                const upIndex = row > 0 ? index - cols : -1;
+
+                const excludedMotifs = [];
+                const excludedColors = [];
+
+                if (leftIndex >= 0) {
+                    excludedMotifs.push(plan[leftIndex].motifIndex);
+                    if (enforceColorAdjacency) excludedColors.push(plan[leftIndex].colorClass);
+                }
+
+                if (upIndex >= 0) {
+                    excludedMotifs.push(plan[upIndex].motifIndex);
+                    if (enforceColorAdjacency) excludedColors.push(plan[upIndex].colorClass);
+                }
+
+                const motifIndex = pickKeyFromQuota(motifQuota, excludedMotifs);
+                const colorClass = pickKeyFromQuota(colorQuota, excludedColors);
+
+                if (motifIndex !== null) {
+                    motifQuota.set(motifIndex, Math.max(0, (motifQuota.get(motifIndex) || 0) - 1));
+                }
+
+                if (colorClass !== null) {
+                    colorQuota.set(colorClass, Math.max(0, (colorQuota.get(colorClass) || 0) - 1));
+                }
+
+                plan.push({
+                    motifIndex: motifIndex !== null ? motifIndex : getWeightedRandomIndex(),
+                    colorClass: colorClass !== null ? colorClass : getWeightedRandomColorClass(),
+                });
+            }
+
+            return plan;
+        }
+
+        function placeClonesInGrid(clones, cols, rows, viewportWidth, viewportHeight) {
+            const cellWidth = viewportWidth / cols;
+            const cellHeight = viewportHeight / rows;
+
+            clones.forEach((clone, index) => {
+                const col = index % cols;
+                const row = Math.floor(index / cols);
+                const width = parseFloat(clone.style.width) || 80;
+                const height = parseFloat(clone.style.height) || 80;
+
+                const centerX = (col + 0.5) * cellWidth;
+                const centerY = (row + 0.5) * cellHeight;
+                const jitterX = (Math.random() - 0.5) * Math.min(24, cellWidth * 0.22);
+                const jitterY = (Math.random() - 0.5) * Math.min(24, cellHeight * 0.22);
+
+                const minX = width / 2;
+                const maxX = Math.max(minX, viewportWidth - width / 2);
+                const minY = height / 2;
+                const maxY = Math.max(minY, viewportHeight - height / 2);
+
+                const x = Math.max(minX, Math.min(maxX, centerX + jitterX));
+                const y = Math.max(minY, Math.min(maxY, centerY + jitterY));
+
+                clone.style.setProperty('--motif-left', `${x}px`);
+                clone.style.setProperty('--motif-top', `${y}px`);
+            });
+        }
+
+        function conflictsWithNearbyStyles(candidate, placed, adjacencyRadius) {
+            for (let i = 0; i < placed.length; i += 1) {
+                const other = placed[i];
+                const dx = candidate.x - other.x;
+                const dy = candidate.y - other.y;
+                const distance = Math.hypot(dx, dy);
+
+                if (distance > adjacencyRadius) continue;
+
+                if (candidate.motifIndex === other.motifIndex) return true;
+                if (candidate.colorClass === other.colorClass) return true;
+            }
+            return false;
+        }
+
+        function intersectsPlaced(candidate, placed, gap) {
+            for (let i = 0; i < placed.length; i += 1) {
+                const other = placed[i];
+                const dx = Math.abs(candidate.x - other.x);
+                const dy = Math.abs(candidate.y - other.y);
+                const minDx = (candidate.width + other.width) / 2 + gap;
+                const minDy = (candidate.height + other.height) / 2 + gap;
+
+                if (dx < minDx && dy < minDy) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight) {
+            const placed = [];
+            const overlapGaps = [26, 20, 14, 8, 4, 0];
+            const baseSpacing = Math.sqrt((viewportWidth * viewportHeight) / Math.max(1, clones.length));
+            const adjacencyRadii = [1.1, 1, 0.9, 0.8, 0.7, 0.6].map((scale) => baseSpacing * scale);
+
+            clones.forEach((clone) => {
+                const width = parseFloat(clone.style.width) || 80;
+                const height = parseFloat(clone.style.height) || 80;
+                const motifIndex = parseInt(clone.dataset.motifIndex || '0', 10);
+                const colorClass = clone.dataset.colorClass || '';
+
+                const minX = width / 2;
+                const maxX = Math.max(minX, viewportWidth - width / 2);
+                const minY = height / 2;
+                const maxY = Math.max(minY, viewportHeight - height / 2);
+
+                let selectedPoint = null;
+
+                for (let level = 0; level < overlapGaps.length && !selectedPoint; level += 1) {
+                    const gap = overlapGaps[level];
+                    const adjacencyRadius = adjacencyRadii[level];
+
+                    for (let attempt = 0; attempt < 260; attempt += 1) {
+                        const x = minX + Math.random() * (maxX - minX || 1);
+                        const y = minY + Math.random() * (maxY - minY || 1);
+                        const candidate = { x, y, width, height, motifIndex, colorClass };
+
+                        if (intersectsPlaced(candidate, placed, gap)) continue;
+                        if (conflictsWithNearbyStyles(candidate, placed, adjacencyRadius)) continue;
+
+                        selectedPoint = candidate;
+                        break;
+                    }
+                }
+
+                if (!selectedPoint) {
+                    selectedPoint = {
+                        x: minX + Math.random() * (maxX - minX || 1),
+                        y: minY + Math.random() * (maxY - minY || 1),
+                        width,
+                        height,
+                        motifIndex,
+                        colorClass,
+                    };
+                }
+
+                placed.push(selectedPoint);
+                clone.style.setProperty('--motif-left', `${selectedPoint.x}px`);
+                clone.style.setProperty('--motif-top', `${selectedPoint.y}px`);
+
+                if (runtimeConfig.debugPlacement) {
+                    clone.title = `motif:${motifIndex + 1} | color:${colorClass} | x:${Math.round(selectedPoint.x)} y:${Math.round(selectedPoint.y)}`;
+                }
+            });
+        }
+
+        function getBalancedCloneCount(maxCount, viewportWidth, viewportHeight) {
+            const sampleScale = runtimeConfig.gridScale;
+            const avgArea = motifTemplates.reduce((sum, motif) => {
+                const w = (parseFloat(motif.dataset.dimensionW) || 80) * sampleScale;
+                const h = (parseFloat(motif.dataset.dimensionH) || 80) * sampleScale;
+                return sum + (w * h);
+            }, 0) / Math.max(1, motifTemplates.length);
+
+            const availableArea = viewportWidth * viewportHeight;
+            const densityFactor = 0.24;
+            const targetCount = Math.floor((availableArea * densityFactor) / Math.max(1, avgArea));
+
+            return Math.max(16, Math.min(maxCount, targetCount));
         }
 
         function applyMotif1Sequence(clone, bloomDelay) {
@@ -610,72 +973,67 @@
             ensureResetScheduler();
         }
 
-        function createClone(index, randomIndex, bloomDelay) {
-            const clone = motifTemplates[randomIndex].cloneNode(true);
+        function createClone(index, motifIndex, bloomDelay, colorClass) {
+            const clone = motifTemplates[motifIndex].cloneNode(true);
             clone.id = `motif-clone-${index}`;
-            clone.classList.add(`motif-type-${randomIndex + 1}`);
-            if (randomIndex === 5) clone.classList.add('motif-type-6');
+            clone.classList.add(`motif-type-${motifIndex + 1}`);
+            if (motifIndex === 5) clone.classList.add('motif-type-6');
+            clone.dataset.motifIndex = String(motifIndex);
+            clone.dataset.colorClass = colorClass || '';
 
-            applyCloneBaseStyle(clone, bloomDelay);
+            applyCloneBaseStyle(clone, bloomDelay, colorClass);
 
-            if (randomIndex === 0 || clone.classList.contains('motif-type-1')) {
+            if (motifIndex === 0 || clone.classList.contains('motif-type-1')) {
                 applyMotif1Sequence(clone, bloomDelay);
             }
 
-            if (randomIndex === 1 || clone.classList.contains('motif-type-2')) {
+            if (motifIndex === 1 || clone.classList.contains('motif-type-2')) {
                 applyMotif2Sequence(clone, bloomDelay);
             }
 
-            if (randomIndex === 2 || clone.classList.contains('motif-type-3')) {
+            if (motifIndex === 2 || clone.classList.contains('motif-type-3')) {
                 applyMotif3Sequence(clone, bloomDelay);
             }
 
-            if (randomIndex === 3 || clone.classList.contains('motif-type-4')) {
+            if (motifIndex === 3 || clone.classList.contains('motif-type-4')) {
                 applyMotif4Sequence(clone, bloomDelay);
             }
 
-            if (randomIndex === 4 || clone.classList.contains('motif-type-5')) {
+            if (motifIndex === 4 || clone.classList.contains('motif-type-5')) {
                 applyMotif5Sequence(clone, bloomDelay);
             }
 
-            if (randomIndex === 5 || clone.classList.contains('motif-type-6')) {
+            if (motifIndex === 5 || clone.classList.contains('motif-type-6')) {
                 applyMotif6Sequence(clone, bloomDelay);
             }
 
-            scheduleCloneCycleReset(clone, randomIndex, bloomDelay);
+            scheduleCloneCycleReset(clone, motifIndex, bloomDelay);
 
             return clone;
         }
 
-        function generateRandomMotifs(count = N) {
+        function generateRandomMotifs(count = runtimeConfig.cloneCount) {
             clearCycleTimers();
             pattern.innerHTML = '';
-            const columnsCount = 3;
-            const generatedIndices = [];
+            const { width: viewportWidth, height: viewportHeight } = getPatternViewport();
+            const targetCount = getBalancedCloneCount(count, viewportWidth, viewportHeight);
+            const { cols, rows } = getGridShape(targetCount, viewportWidth, viewportHeight);
+            const clonePlan = buildClonePlan(targetCount, cols);
+            const clones = [];
 
-            for (let index = 0; index < count; index++) {
-                let randomIndex;
-                let attempts = 0;
-
-                do {
-                    randomIndex = getWeightedRandomIndex();
-                    attempts += 1;
-                    if (attempts > 100) break;
-                } while (
-                    (index >= 1 && randomIndex === generatedIndices[index - 1]) ||
-                    (index >= columnsCount && randomIndex === generatedIndices[index - columnsCount])
-                );
-
-                generatedIndices[index] = randomIndex;
+            clonePlan.forEach((item, index) => {
                 const bloomDelay = Math.random() * getCycleDurationSeconds();
-                const clone = createClone(index, randomIndex, bloomDelay);
-                pattern.appendChild(clone);
-            }
+                const clone = createClone(index, item.motifIndex, bloomDelay, item.colorClass);
+                clones.push(clone);
+            });
+
+            placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight);
+            clones.forEach((clone) => pattern.appendChild(clone));
         }
 
         function showAllMotifs() {
             pattern.classList.remove('single-view');
-            generateRandomMotifs(N);
+            generateRandomMotifs(runtimeConfig.cloneCount);
         }
 
         function showSingleMotif(index) {
@@ -695,8 +1053,8 @@
             clone.style.setProperty('--bloom-delay', `${bloomDelay}s`);
             clone.style.setProperty('--animation-delay', '0s');
             clone.style.setProperty('--float-duration', '8s');
-            clone.style.setProperty('--motif-offset', '0px');
-            clone.style.setProperty('--motif-bottom', '0px');
+            clone.style.setProperty('--motif-left', '0px');
+            clone.style.setProperty('--motif-top', '0px');
 
             if (index === 0) {
                 applyMotif1Sequence(clone, bloomDelay);
@@ -740,6 +1098,25 @@
         });
 
         window.addEventListener('DOMContentLoaded', () => {
+            if (runtimeConfig.debugPlacement) {
+                document.body.dataset.debugPlacement = 'true';
+            }
             showAllMotifs();
+        });
+
+        window.addEventListener('resize', () => {
+            if (resizeReflowTimerId !== null) {
+                clearTimeout(resizeReflowTimerId);
+            }
+
+            resizeReflowTimerId = window.setTimeout(() => {
+                resizeReflowTimerId = null;
+                const value = selector.value;
+                if (value === 'all') {
+                    showAllMotifs();
+                    return;
+                }
+                showSingleMotif(parseInt(value, 10));
+            }, 180);
         });
     </script>
