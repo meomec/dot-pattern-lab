@@ -1,84 +1,89 @@
 # Eames — Motifs SVG animés
 
-Projet front simple (HTML/CSS/JS vanilla) pour générer une composition de motifs inspirés Eames, avec animations séquencées et variations de couleurs.
+Projet front statique (HTML/CSS/JS vanilla) pour générer un champ de motifs inspirés Eames, avec séquences d’animation par élément, placement contraint et configuration par URL.
 
 ## Aperçu
 
-- 6 motifs SVG (`motif-1` à `motif-6`)
-- génération aléatoire sur une grille
-- mode « single view » via le sélecteur
-- animations par étapes (croissance → plateau → collapse/fade)
-- gestion d’origines (`transform-origin`) par élément pour un rendu organique
-- palette de couleurs appliquée par clone avec fréquence pondérée
+- 6 motifs SVG segmentés (`motif-1` à `motif-6`)
+- animations séquencées par branches/disques selon le motif
+- génération multi-clones avec placement type Poisson-disc contraint
+- contraintes d’adjacence : éviter voisins de même motif et/ou même couleur
+- quotas globaux respectant les fréquences de motifs et de couleurs
+- mode focus via le sélecteur (`single view`)
 
-## Structure
+## Fichiers
 
-- `eames.html` :
-  - templates des motifs SVG inline
-  - logique JS de génération, séquences d’animation, randomisation
-- `eames.css` :
+- `eames.html`
+  - templates SVG inline
+  - logique de génération (plan de clones, quotas, placement)
+  - séquences d’animation JS (`applyMotif1Sequence` … `applyMotif6Sequence`)
+- `eames.css`
   - layout global
-  - keyframes et overrides par motif
-  - classes de couleurs
-- `eames_01.svg` … `eames_06.svg` : sources SVG
-- `458300_repeat.svg` : ressource annexe
+  - keyframes
+  - overrides par motif (`.motif-type-*`)
+  - palette couleurs (`currentColor`)
+- `eames_01.svg` … `eames_06.svg`
+  - sources SVG de découpe
 
-## Fonctionnement principal
-
-### 1) Génération des clones
-
-Dans `eames.html`, `generateRandomMotifs()` crée des clones à partir des templates inline.
-Chaque clone passe par `applyCloneBaseStyle()` :
-
-- délai d’apparition (`--bloom-delay`)
-- durée flottante (`--float-duration`)
-- offsets aléatoires
-- mirroring (selon motif)
-- couleur aléatoire pondérée
-
-### 2) Séquences par motif
-
-Fonctions dédiées :
-
-- `applyMotif1Sequence()`
-- `applyMotif2Sequence()`
-- `applyMotif6Sequence()`
-
-Elles assignent les `animationDelay` de chaque élément (`disc*`, `branch*`) pour obtenir l’ordre visuel souhaité.
-
-### 3) Synchronisation cyclique
-
-La durée globale est centralisée via `--cycle-duration` (dans `:root`, `eames.css`).
-Le JS lit cette valeur (`getCycleDurationSeconds()`) pour garder CSS et JS alignés.
-
-### 4) Couleurs
-
-Les paths SVG utilisent `currentColor` via :
-
-- `.motif.color svg path { fill: currentColor; }`
-
-Les classes de couleur sont dans `eames.css` (`.color.blue`, `.color.pink`, etc.)
-et la fréquence de tirage est dans `eames.html` (`colorFrequencies`).
-
-## Lancer le projet
-
-Aucune build nécessaire.
+## Lancer
 
 1. Ouvrir `eames.html` dans un navigateur.
 2. Utiliser le sélecteur en haut à droite :
-   - `Tous les motifs` pour la génération complète
-   - un motif spécifique pour le mode focus
+   - `Tous les motifs` : génération complète
+   - `Motif X` : affichage focus
 
-## Personnalisation rapide
+## Paramètres URL (query params)
 
-- Vitesse globale : modifier `--cycle-duration` dans `eames.css`
-- Densité/nb de motifs : modifier `N` dans `eames.html`
-- Fréquence des motifs : ajuster `data-frequency` dans chaque bloc `.motif`
-- Fréquence des couleurs : ajuster `colorFrequencies` dans `eames.html`
-- Origines d’animation : ajuster les variables `--m*-*-origin` dans `eames.css`
+Configuration runtime directement via l’URL.
 
-## Notes
+- `n` : nombre max de clones (entier positif)
+  - exemple : `?n=140`
+- `gridScale` (alias `scale`) : facteur d’échelle des clones
+  - borne runtime : `0.05` à `1.2`
+  - exemple : `?gridScale=0.22`
+- `colorMode` (aliases `color`, `couleur`) : mode de couleur
+  - `color` (défaut) : palette pondérée complète
+  - `noir` / `black` : noir uniquement
+  - exemple : `?colorMode=noir`
+- `debug` : mode debug placement
+  - valeurs acceptées : `1|true|yes|on` / `0|false|no|off`
+  - exemple : `?debug=1`
 
-- Motifs 1, 2 et 6 disposent de séquences avancées (branches/disques séparés).
-- Les comportements de collapse sont factorisés via `.assembly-collapse`.
-- Si un motif est modifié côté SVG source, réimporter le bloc inline correspondant dans `eames.html` puis recalibrer ses origines dans `eames.css`.
+Exemple combiné :
+
+`?n=120&gridScale=0.2&colorMode=color&debug=1`
+
+## Génération des clones
+
+Pipeline principal dans `eames.html` :
+
+1. **Calcul du nombre cible** selon viewport et `gridScale`.
+2. **Construction d’un plan** (`motifIndex`, `colorClass`) avec :
+   - quotas pondérés (fréquences globales),
+   - contraintes d’adjacence locale (gauche/haut).
+3. **Instantiation des clones** et application du style de base (`applyCloneBaseStyle`).
+4. **Placement Poisson-disc contraint** (`placeClonesPoissonConstrained`) pour limiter les recouvrements.
+5. **Programmation des resets de cycle** via scheduler global.
+
+## Animation
+
+- Durée globale : `--cycle-duration` dans `eames.css`.
+- Chaque motif a sa séquence JS dédiée (`applyMotifXSequence`).
+- Les collapses de structure sont factorisés via `.assembly-collapse`.
+- Les couleurs sont appliquées via `currentColor` sur les `path` SVG.
+
+## Ajustements fréquents
+
+- Fréquences motifs : `data-frequency` sur les blocs `.motif` dans `eames.html`.
+- Fréquences couleurs : `colorFrequencies` dans `eames.html`.
+- Origines d’animation : variables `--m*-*-origin` dans `eames.css`.
+- Ordres de croissance : fonctions `applyMotifXSequence` dans `eames.html`.
+
+## Maintenance
+
+Quand un SVG est redécoupé :
+
+1. Remplacer le bloc inline correspondant dans `eames.html`.
+2. Vérifier IDs (`branch*`, `disc*`, groupes `tree` / `m*-assembly`).
+3. Recaler les `transform-origin` dans `eames.css`.
+4. Ajuster la séquence JS du motif si nécessaire.
