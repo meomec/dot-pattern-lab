@@ -583,13 +583,15 @@
             return false;
         }
 
-        function intersectsPlaced(candidate, placed, gap) {
+        function intersectsPlaced(candidate, placed, marginRatio) {
             for (let i = 0; i < placed.length; i += 1) {
                 const other = placed[i];
                 const dx = Math.abs(candidate.x - other.x);
                 const dy = Math.abs(candidate.y - other.y);
-                const minDx = (candidate.width + other.width) / 2 + gap;
-                const minDy = (candidate.height + other.height) / 2 + gap;
+                const minDxBase = (candidate.width + other.width) / 2;
+                const minDyBase = (candidate.height + other.height) / 2;
+                const minDx = minDxBase * (1 + marginRatio);
+                const minDy = minDyBase * (1 + marginRatio);
 
                 if (dx < minDx && dy < minDy) {
                     return true;
@@ -600,9 +602,13 @@
 
         function placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight) {
             const placed = [];
-            const overlapGaps = [26, 20, 14, 8, 4, 0];
-            const baseSpacing = Math.sqrt((viewportWidth * viewportHeight) / Math.max(1, clones.length));
-            const adjacencyRadii = [1.1, 1, 0.9, 0.8, 0.7, 0.6].map((scale) => baseSpacing * scale);
+            const marginRatios = [0.22, 0.16, 0.11, 0.07, 0.035, 0];
+            const avgFootprint = clones.reduce((sum, clone) => {
+                const width = parseFloat(clone.style.width) || 80;
+                const height = parseFloat(clone.style.height) || 80;
+                return sum + ((width + height) / 2);
+            }, 0) / Math.max(1, clones.length);
+            const adjacencyRadii = [2.2, 1.9, 1.65, 1.4, 1.15, 0.95].map((scale) => avgFootprint * scale);
 
             clones.forEach((clone) => {
                 const width = parseFloat(clone.style.width) || 80;
@@ -617,8 +623,8 @@
 
                 let selectedPoint = null;
 
-                for (let level = 0; level < overlapGaps.length && !selectedPoint; level += 1) {
-                    const gap = overlapGaps[level];
+                for (let level = 0; level < marginRatios.length && !selectedPoint; level += 1) {
+                    const marginRatio = marginRatios[level];
                     const adjacencyRadius = adjacencyRadii[level];
 
                     for (let attempt = 0; attempt < 260; attempt += 1) {
@@ -626,7 +632,7 @@
                         const y = minY + Math.random() * (maxY - minY || 1);
                         const candidate = { x, y, width, height, motifIndex, colorClass };
 
-                        if (intersectsPlaced(candidate, placed, gap)) continue;
+                        if (intersectsPlaced(candidate, placed, marginRatio)) continue;
                         if (conflictsWithNearbyStyles(candidate, placed, adjacencyRadius)) continue;
 
                         selectedPoint = candidate;
