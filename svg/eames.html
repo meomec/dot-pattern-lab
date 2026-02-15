@@ -181,7 +181,8 @@
         const pattern = document.querySelector('.pattern');
         const motifTemplates = Array.from(document.querySelectorAll('.motif'));
         const frequencies = motifTemplates.map((motif) => parseFloat(motif.dataset.frequency) || 1);
-        const cycleTimerIds = [];
+        const cloneResetEntries = [];
+        let resetSchedulerId = null;
         const colorFrequencies = {
             yellow: 0.1,
             red: 0.1,
@@ -194,11 +195,41 @@
         const colorClasses = Object.keys(colorFrequencies);
 
         function clearCycleTimers() {
-            while (cycleTimerIds.length > 0) {
-                const timerId = cycleTimerIds.pop();
-                clearTimeout(timerId);
-                clearInterval(timerId);
+            cloneResetEntries.length = 0;
+            if (resetSchedulerId !== null) {
+                clearInterval(resetSchedulerId);
+                resetSchedulerId = null;
             }
+        }
+
+        function ensureResetScheduler() {
+            if (resetSchedulerId !== null) return;
+
+            resetSchedulerId = window.setInterval(() => {
+                if (cloneResetEntries.length === 0) {
+                    clearInterval(resetSchedulerId);
+                    resetSchedulerId = null;
+                    return;
+                }
+
+                const now = Date.now();
+
+                for (let i = cloneResetEntries.length - 1; i >= 0; i -= 1) {
+                    const entry = cloneResetEntries[i];
+
+                    if (!entry.clone.isConnected) {
+                        cloneResetEntries.splice(i, 1);
+                        continue;
+                    }
+
+                    if (now >= entry.nextResetAtMs) {
+                        resetMotifCycleState(entry.clone, entry.motifIndex);
+                        while (entry.nextResetAtMs <= now) {
+                            entry.nextResetAtMs += entry.cycleMs;
+                        }
+                    }
+                }
+            }, 120);
         }
 
         function parseDurationToSeconds(value) {
@@ -566,27 +597,17 @@
             if (motifIndex !== 0 && motifIndex !== 1 && motifIndex !== 2 && motifIndex !== 3 && motifIndex !== 4 && motifIndex !== 5) return;
 
             const cycleDuration = getCycleDurationSeconds();
-            const firstResetDelayMs = (bloomDelay + cycleDuration) * 1000;
             const cycleMs = cycleDuration * 1000;
+            const firstResetDelayMs = (bloomDelay + cycleDuration) * 1000;
 
-            let intervalId;
-            const timeoutId = window.setTimeout(() => {
-                if (!clone.isConnected) return;
+            cloneResetEntries.push({
+                clone,
+                motifIndex,
+                cycleMs,
+                nextResetAtMs: Date.now() + firstResetDelayMs,
+            });
 
-                const runReset = () => {
-                    if (!clone.isConnected) {
-                        clearInterval(intervalId);
-                        return;
-                    }
-                    resetMotifCycleState(clone, motifIndex);
-                };
-
-                runReset();
-                intervalId = window.setInterval(runReset, cycleMs);
-                cycleTimerIds.push(intervalId);
-            }, firstResetDelayMs);
-
-            cycleTimerIds.push(timeoutId);
+            ensureResetScheduler();
         }
 
         function createClone(index, randomIndex, bloomDelay) {

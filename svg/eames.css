@@ -181,96 +181,6 @@ body {
   100% { transform: translate(0px, 0px) rotate(0deg); }
 }
 
-@keyframes bloom {
-  0% {
-    transform: scale(0.05) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    transform: scale(1) rotate(3deg);
-    opacity: 0.5;
-  }
-  30% {
-    transform: scale(1) rotate(3deg);
-    opacity: 1;
-  }
-  45% {
-    transform: scale(1.05) rotate(1deg);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
-  }
-  90% {
-    transform: scale(1) rotate(-1deg);
-    opacity: 1;
-  }
-  92% {
-    transform: scale(1) rotate(-2deg);
-    opacity: 0.5;
-  }
-  95% {
-    transform: scale(0.05) rotate(-3deg);
-    opacity: 0.5;
-  }
-  99% {
-    transform: scale(0.05) rotate(-3deg);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(0.05) rotate(0deg);
-    opacity: 0;
-  }
-}
-
-/* =========================
-   Generic growth model
-   ========================= */
-[class^="motif-type-"] #disc1 {
-  opacity: 0;
-  transform-origin: center;
-  animation: gGrowDisc1 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
-  animation-fill-mode: both;
-}
-
-[class^="motif-type-"] #tree {
-  opacity: 0;
-  transform-origin: center;
-  animation: gGrowTree var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
-  animation-fill-mode: both;
-}
-
-[class^="motif-type-"] [id^="disc"]:not(#disc1) {
-  opacity: 0;
-  transform-origin: center;
-  animation: gGrowDiscBourgeon var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
-  animation-fill-mode: both;
-}
-
-@keyframes gGrowDisc1 {
-  0%   { opacity: 0; transform: scale(0.05); }
-  8%   { opacity: 1; transform: scale(1); }
-  96%  { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1); }
-}
-
-@keyframes gGrowTree {
-  0%   { opacity: 0; transform: scaleY(0.05); }
-  12%  { opacity: 1; transform: scaleY(1); }
-  92%  { opacity: 1; transform: scaleY(1); }
-  98%  { opacity: 0; transform: scaleY(1); }
-  100% { opacity: 0; transform: scaleY(1); }
-}
-
-@keyframes gGrowDiscBourgeon {
-  0%   { opacity: 0; transform: scale(0.05); }
-  24%  { opacity: 1; transform: scale(1); }
-  76%  { opacity: 1; transform: scale(1); }
-  84%  { opacity: 0; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1); }
-}
-
 /* =========================
    Shared collapse utility
    ========================= */
@@ -997,7 +907,6 @@ body {
   transform-box: fill-box;
   transform-origin: var(--m6-disc2-origin);
   animation: m6GrowDisc2 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
-  animation-delay: calc(var(--bloom-delay, 0s) + 4s);
   animation-fill-mode: both;
   opacity: 0;
 }
@@ -1006,7 +915,6 @@ body {
   transform-box: fill-box;
   transform-origin: var(--m6-disc3-origin);
   animation: m6GrowDisc3 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
-  animation-delay: calc(var(--bloom-delay, 0s) + 4s);
   animation-fill-mode: both;
   opacity: 0;
 }
