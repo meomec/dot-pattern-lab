@@ -52,12 +52,12 @@ Tous les réglages sont runtime via query params.
 - `densite=0` + `n=0` → mode auto **optimisé** (remplissage max sans chevauchement forcé)
 - `densite>0` + `n=0` → auto piloté par densité
 
-### `gridScale` (alias `scale`)
+### `scale` (alias legacy `gridScale`)
 
 - borne : `0.05` à `1.2`
 - ajuste la taille des clones
 
-### `colorMode` (aliases `color`, `couleur`)
+### `color` (aliases legacy `colorMode`, `couleur`)
 
 - `color` (défaut) : palette pondérée complète
 - `black` / `noir` : noir uniquement
@@ -74,10 +74,10 @@ Tous les réglages sont runtime via query params.
 
 ## 🧪 Exemples prêts à copier
 
-- Auto optimisé : `?n=0&densite=0&gridScale=0.25`
-- Auto piloté : `?n=0&densite=0.3&gridScale=0.3`
-- Forcé à 140 clones : `?n=140&gridScale=0.22&colorMode=color`
-- Noir uniquement + contrôles visibles : `?colorMode=noir&controls=1`
+- Auto optimisé : `?n=0&densite=0&scale=0.25`
+- Auto piloté : `?n=0&densite=0.3&scale=0.3`
+- Forcé à 140 clones : `?n=140&scale=0.22&color=color`
+- Noir uniquement + contrôles visibles : `?color=noir&controls=1`
 
 ## 🧠 Logique de génération (résumé)
 
@@ -90,9 +90,12 @@ Tous les réglages sont runtime via query params.
 ## 🛠️ Notes de tuning rapide
 
 - Plus de motifs visibles : augmenter `densite` (si `n=0`) ou fixer `n`.
-- Moins de collisions : baisser `densite` ou `gridScale`.
-- Composition plus sobre : `colorMode=noir`.
+- Moins de collisions : baisser `densite` ou `scale`.
+- Composition plus sobre : `color=noir`.
 
 ---
 
 Have fun 🌈🫧
+
+
+https://meomec.github.io/Dot_pattern/eames.html?scale=0.75

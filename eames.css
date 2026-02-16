@@ -22,6 +22,7 @@ body {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
+  width: min(92vw, 360px);
 }
 
 .controls.on {
@@ -29,21 +30,50 @@ body {
 }
 
 .controls label {
-  margin-right: 10px;
   font-weight: bold;
   color: #333;
+  font-size: 13px;
 }
 
-.controls select {
+.controls-grid {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 8px 10px;
+  align-items: center;
+}
+
+.controls select,
+.controls input[type="number"] {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
-  cursor: pointer;
   background-color: white;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.controls select:hover {
+.controls input[type="checkbox"] {
+  justify-self: start;
+}
+
+.controls select:hover,
+.controls input[type="number"]:hover {
+  border-color: #999;
+}
+
+#apply-controls {
+  margin-top: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#apply-controls:hover {
   border-color: #999;
 }
 

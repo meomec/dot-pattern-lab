@@ -8,16 +8,40 @@
 	</head>
 	<body>
 		<div class="controls" id="controls">
-			<label for="motif-selector">Choisir un motif :</label>
-			<select id="motif-selector">
-				<option value="all" selected>Tous les motifs</option>
-				<option value="0">Motif 1</option>
-				<option value="1">Motif 2</option>
-				<option value="2">Motif 3</option>
-				<option value="3">Motif 4</option>
-				<option value="4">Motif 5</option>
-				<option value="5">Motif 6</option>
-			</select>
+			<div class="controls-grid">
+				<label for="motif-selector">Motif</label>
+				<select id="motif-selector">
+					<option value="all" selected>Tous les motifs</option>
+					<option value="0">Motif 1</option>
+					<option value="1">Motif 2</option>
+					<option value="2">Motif 3</option>
+					<option value="3">Motif 4</option>
+					<option value="4">Motif 5</option>
+					<option value="5">Motif 6</option>
+				</select>
+
+				<label for="clone-count-input">N</label>
+				<input id="clone-count-input" type="number" min="0" step="10">
+
+				<label for="grid-scale-input">Échelle</label>
+				<input id="grid-scale-input" type="number" min="0.05" max="1.2" step="0.05">
+
+				<label for="density-input">Densite</label>
+				<input id="density-input" type="number" min="0" max="1.2" step="0.05">
+
+				<label for="color-mode-input">Mode</label>
+				<select id="color-mode-input">
+					<option value="color">couleur</option>
+					<option value="black">n&b</option>
+				</select>
+
+				<label for="debug-input">debug</label>
+				<input id="debug-input" type="checkbox">
+
+				<label for="controls-visible-input">controls</label>
+				<input id="controls-visible-input" type="checkbox">
+			</div>
+			<button id="apply-controls" type="button">Appliquer</button>
 		</div>
 
 		<div class="pattern">

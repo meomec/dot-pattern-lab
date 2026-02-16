@@ -1,6 +1,13 @@
-const DEFAULT_GRID_SCALE = 0.25;
+const DEFAULT_GRID_SCALE = 0.75;
 const DEFAULT_DENSITY = 0;
 const selector = document.getElementById("motif-selector");
+const cloneCountInput = document.getElementById("clone-count-input");
+const gridScaleInput = document.getElementById("grid-scale-input");
+const densityInput = document.getElementById("density-input");
+const colorModeInput = document.getElementById("color-mode-input");
+const debugInput = document.getElementById("debug-input");
+const controlsVisibleInput = document.getElementById("controls-visible-input");
+const applyControlsButton = document.getElementById("apply-controls");
 const pattern = document.querySelector(".pattern");
 const motifTemplates = Array.from(document.querySelectorAll(".motif"));
 const frequencies = motifTemplates.map(
@@ -60,7 +67,7 @@ const queryCloneCount = parseCloneCountQuery(queryParams.get("n"));
 const runtimeConfig = {
   cloneCount: queryCloneCount,
   gridScale: parseGridScale(
-    queryParams.get("gridScale") || queryParams.get("scale"),
+    queryParams.get("scale") || queryParams.get("gridScale"),
     DEFAULT_GRID_SCALE,
   ),
   density: parseDensity(
@@ -68,8 +75,8 @@ const runtimeConfig = {
     DEFAULT_DENSITY,
   ),
   colorMode: parseColorMode(
-    queryParams.get("colorMode") ||
-      queryParams.get("color") ||
+    queryParams.get("color") ||
+      queryParams.get("colorMode") ||
       queryParams.get("couleur"),
   ),
   debugPlacement: parseBooleanQuery(queryParams.get("debug"), false),
@@ -79,6 +86,86 @@ const runtimeConfig = {
 function setControlsVisibility() {
   const visibility = runtimeConfig.controlsVisibility;
   document.getElementById("controls")?.classList.toggle("on", visibility);
+}
+
+function setDebugMode() {
+  if (runtimeConfig.debugPlacement) {
+    document.body.dataset.debugPlacement = "true";
+    return;
+  }
+  delete document.body.dataset.debugPlacement;
+}
+
+function syncControlsInputsFromRuntime() {
+  if (cloneCountInput) {
+    cloneCountInput.value = String(runtimeConfig.cloneCount ?? 0);
+  }
+
+  if (gridScaleInput) {
+    gridScaleInput.value = String(runtimeConfig.gridScale);
+  }
+
+  if (densityInput) {
+    densityInput.value = String(runtimeConfig.density);
+  }
+
+  if (colorModeInput) {
+    colorModeInput.value = runtimeConfig.colorMode;
+  }
+
+  if (debugInput) {
+    debugInput.checked = runtimeConfig.debugPlacement;
+  }
+
+  if (controlsVisibleInput) {
+    controlsVisibleInput.checked = runtimeConfig.controlsVisibility;
+  }
+}
+
+function syncQueryFromRuntime() {
+  const params = new URLSearchParams(window.location.search);
+
+  params.set("n", String(runtimeConfig.cloneCount ?? 0));
+  params.set("scale", String(runtimeConfig.gridScale));
+  params.delete("gridScale");
+  params.set("density", String(runtimeConfig.density));
+  params.set("color", runtimeConfig.colorMode);
+  params.delete("colorMode");
+  params.set("debug", runtimeConfig.debugPlacement ? "1" : "0");
+  params.set("controls", runtimeConfig.controlsVisibility ? "1" : "0");
+
+  const queryString = params.toString();
+  const nextUrl = `${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
+  window.history.replaceState({}, "", nextUrl);
+}
+
+function applyRuntimeConfigFromControls() {
+  if (!cloneCountInput || !gridScaleInput || !densityInput || !colorModeInput) {
+    return;
+  }
+
+  runtimeConfig.cloneCount = parseCloneCountQuery(cloneCountInput.value);
+  runtimeConfig.gridScale = parseGridScale(
+    gridScaleInput.value,
+    DEFAULT_GRID_SCALE,
+  );
+  runtimeConfig.density = parseDensity(densityInput.value, DEFAULT_DENSITY);
+  runtimeConfig.colorMode = parseColorMode(colorModeInput.value);
+  runtimeConfig.debugPlacement = Boolean(debugInput?.checked);
+  runtimeConfig.controlsVisibility = Boolean(controlsVisibleInput?.checked);
+
+  syncControlsInputsFromRuntime();
+  setDebugMode();
+  setControlsVisibility();
+  syncQueryFromRuntime();
+
+  const value = selector.value;
+  if (value === "all") {
+    showAllMotifs();
+    return;
+  }
+
+  showSingleMotif(parseInt(value, 10));
 }
 
 function getActiveColorClasses() {
@@ -1074,11 +1161,12 @@ selector.addEventListener("change", (event) => {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  if (runtimeConfig.debugPlacement) {
-    document.body.dataset.debugPlacement = "true";
-  }
-  showAllMotifs();
+  syncControlsInputsFromRuntime();
+  setDebugMode();
   setControlsVisibility();
+  showAllMotifs();
+
+  applyControlsButton?.addEventListener("click", applyRuntimeConfigFromControls);
 });
 
 window.addEventListener("resize", () => {
