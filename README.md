@@ -1,89 +1,98 @@
-# Dot Pattern — Motifs SVG animés
+# 🎨 Dot Pattern — Animated SVG Garden
 
-Projet front statique (HTML/CSS/JS vanilla) pour générer un champ de motifs inspirés du Dot pattern de Charles Eames, avec séquences d’animation par élément, placement contraint et configuration par URL.
+Mini projet front en HTML/CSS/JS vanilla pour générer un champ de motifs inspiré du Dot Pattern de Charles Eames.
 
-## Aperçu
+Ambiance actuelle : placement intelligent, animation séquencée, contraintes d’adjacence, et configuration complète par URL ⚡️
 
-- 6 motifs SVG segmentés
-- animations séquencées par branches/disques selon le motif
-- génération multi-clones avec placement type Poisson-disc contraint
-- contraintes d’adjacence : éviter voisins de même motif et/ou même couleur
-- quotas globaux respectant les fréquences de motifs et de couleurs
-- mode focus via le sélecteur (`single view`)
+## ✨ Ce que fait le projet
 
-## Fichiers
+- 6 motifs SVG segmentés et animés
+- séquences de croissance dédiées par motif (`applyMotif1Sequence` → `applyMotif6Sequence`)
+- génération multi-clones avec placement contraint de type Poisson
+- évite les voisins trop proches de même motif
+- évite les voisins de même couleur **sauf noir** (le noir peut être côte à côte)
+- fréquences pondérées respectées (motifs + couleurs)
+- mode focus (single motif) via le sélecteur
+
+## 🗂️ Structure
 
 - `eames.html`
-  - templates SVG inline
-  - logique de génération (plan de clones, quotas, placement)
-  - séquences d’animation JS (`applyMotif1Sequence` … `applyMotif6Sequence`)
+  - structure de page + templates de motifs inline
+  - hook vers `eames.js`
 - `eames.css`
-  - layout global
-  - keyframes
-  - overrides par motif (`.motif-type-*`)
-  - palette couleurs (`currentColor`)
-- `eames_01.svg` … `eames_06.svg`
-  - sources SVG de découpe
+  - layout, keyframes, couleurs, origins, overrides par motif
+- `eames.js`
+  - génération des clones
+  - scheduler global de reset
+  - quotas / contraintes / placement
+  - parsing des paramètres URL
+- `svg/eames_00.svg` → `svg/eames_06.svg`
+  - sources SVG externes de référence
 
-## Lancer
+## 🚀 Lancement
 
 1. Ouvrir `eames.html` dans un navigateur.
-2. Utiliser le sélecteur en haut à droite :
-   - `Tous les motifs` : génération complète
-   - `Motif X` : affichage focus
+2. Utiliser le sélecteur en haut à droite (`Tous les motifs` / `Motif X`).
+3. Ajuster les paramètres via l’URL pour piloter le rendu.
 
-## Paramètres URL (query params)
+## 🔧 Paramètres URL
 
-Configuration runtime directement via l’URL.
+Tous les réglages sont runtime via query params.
 
-- `n` : nombre max de clones (entier positif)
-  - exemple : `?n=140`
-- `gridScale` (alias `scale`) : facteur d’échelle des clones
-  - borne runtime : `0.05` à `1.2`
-  - exemple : `?gridScale=0.22`
-- `colorMode` (aliases `color`, `couleur`) : mode de couleur
-  - `color` (défaut) : palette pondérée complète
-  - `noir` / `black` : noir uniquement
-  - exemple : `?colorMode=noir`
-- `debug` : mode debug placement
-  - valeurs acceptées : `1|true|yes|on` / `0|false|no|off`
-  - exemple : `?debug=1`
+### `n`
 
-Exemple combiné :
+- `n=0` → mode auto
+- `n>0` → **override strict** du nombre de clones
+- si absent/invalide → mode auto
 
-`?n=120&gridScale=0.2&colorMode=color&debug=1`
+### `densite` (alias `density`)
 
-## Génération des clones
+- borne : `0` à `1.2`
+- défaut : `0`
+- `densite=0` + `n=0` → mode auto **optimisé** (remplissage max sans chevauchement forcé)
+- `densite>0` + `n=0` → auto piloté par densité
 
-Pipeline principal dans `eames.html` :
+### `gridScale` (alias `scale`)
 
-1. **Calcul du nombre cible** selon viewport et `gridScale`.
-2. **Construction d’un plan** (`motifIndex`, `colorClass`) avec :
-   - quotas pondérés (fréquences globales),
-   - contraintes d’adjacence locale (gauche/haut).
-3. **Instantiation des clones** et application du style de base (`applyCloneBaseStyle`).
-4. **Placement Poisson-disc contraint** (`placeClonesPoissonConstrained`) pour limiter les recouvrements.
-5. **Programmation des resets de cycle** via scheduler global.
+- borne : `0.05` à `1.2`
+- ajuste la taille des clones
 
-## Animation
+### `colorMode` (aliases `color`, `couleur`)
 
-- Durée globale : `--cycle-duration` dans `eames.css`.
-- Chaque motif a sa séquence JS dédiée (`applyMotifXSequence`).
-- Les collapses de structure sont factorisés via `.assembly-collapse`.
-- Les couleurs sont appliquées via `currentColor` sur les `path` SVG.
+- `color` (défaut) : palette pondérée complète
+- `black` / `noir` : noir uniquement
 
-## Ajustements fréquents
+### `controls`
 
-- Fréquences motifs : `data-frequency` sur les blocs `.motif` dans `eames.html`.
-- Fréquences couleurs : `colorFrequencies` dans `eames.html`.
-- Origines d’animation : variables `--m*-*-origin` dans `eames.css`.
-- Ordres de croissance : fonctions `applyMotifXSequence` dans `eames.html`.
+- affiche/masque le panneau de contrôle
+- booléens acceptés : `1|true|yes|on` / `0|false|no|off`
 
-## Maintenance
+### `debug`
 
-Quand un SVG est redécoupé :
+- active le debug visuel de placement
+- booléens acceptés : `1|true|yes|on` / `0|false|no|off`
 
-1. Remplacer le bloc inline correspondant dans `eames.html`.
-2. Vérifier IDs (`branch*`, `disc*`, groupes `tree` / `m*-assembly`).
-3. Recaler les `transform-origin` dans `eames.css`.
-4. Ajuster la séquence JS du motif si nécessaire.
+## 🧪 Exemples prêts à copier
+
+- Auto optimisé : `?n=0&densite=0&gridScale=0.25`
+- Auto piloté : `?n=0&densite=0.3&gridScale=0.3`
+- Forcé à 140 clones : `?n=140&gridScale=0.22&colorMode=color`
+- Noir uniquement + contrôles visibles : `?colorMode=noir&controls=1`
+
+## 🧠 Logique de génération (résumé)
+
+1. Calcul du nombre cible (`getBalancedCloneCount`) selon viewport, scale, densité, mode auto/forcé.
+2. Construction d’un plan de clones (quotas pondérés + exclusion locale gauche/haut).
+3. Application du style de base (`applyCloneBaseStyle`) et des séquences d’animation.
+4. Placement contraint (`placeClonesPoissonConstrained`) avec règles anti-chevauchement.
+5. Reset cyclique via scheduler global pour garder les animations synchronisées.
+
+## 🛠️ Notes de tuning rapide
+
+- Plus de motifs visibles : augmenter `densite` (si `n=0`) ou fixer `n`.
+- Moins de collisions : baisser `densite` ou `gridScale`.
+- Composition plus sobre : `colorMode=noir`.
+
+---
+
+Have fun 🌈🫧

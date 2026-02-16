@@ -1,5 +1,5 @@
-const DEFAULT_CLONE_COUNT = 200;
 const DEFAULT_GRID_SCALE = 0.25;
+const DEFAULT_DENSITY = 0;
 const selector = document.getElementById("motif-selector");
 const pattern = document.querySelector(".pattern");
 const motifTemplates = Array.from(document.querySelectorAll(".motif"));
@@ -20,9 +20,10 @@ const colorFrequencies = {
 };
 const colorClasses = Object.keys(colorFrequencies);
 
-function parsePositiveInt(value, fallbackValue) {
-  const parsed = parseInt(value || "", 10);
-  if (!Number.isFinite(parsed) || parsed <= 0) return fallbackValue;
+function parseCloneCountQuery(value) {
+  if (value == null || String(value).trim() === "") return null;
+  const parsed = parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
   return parsed;
 }
 
@@ -30,6 +31,12 @@ function parseGridScale(value, fallbackValue) {
   const parsed = parseFloat(value || "");
   if (!Number.isFinite(parsed)) return fallbackValue;
   return Math.min(1.2, Math.max(0.05, parsed));
+}
+
+function parseDensity(value, fallbackValue) {
+  const parsed = parseFloat(value || "");
+  if (!Number.isFinite(parsed)) return fallbackValue;
+  return Math.min(1.2, Math.max(0, parsed));
 }
 
 function parseBooleanQuery(value, fallbackValue = false) {
@@ -49,11 +56,16 @@ function parseColorMode(value) {
 }
 
 const queryParams = new URLSearchParams(window.location.search);
+const queryCloneCount = parseCloneCountQuery(queryParams.get("n"));
 const runtimeConfig = {
-  cloneCount: parsePositiveInt(queryParams.get("n"), DEFAULT_CLONE_COUNT),
+  cloneCount: queryCloneCount,
   gridScale: parseGridScale(
     queryParams.get("gridScale") || queryParams.get("scale"),
     DEFAULT_GRID_SCALE,
+  ),
+  density: parseDensity(
+    queryParams.get("density") || queryParams.get("densite"),
+    DEFAULT_DENSITY,
   ),
   colorMode: parseColorMode(
     queryParams.get("colorMode") ||
@@ -61,7 +73,13 @@ const runtimeConfig = {
       queryParams.get("couleur"),
   ),
   debugPlacement: parseBooleanQuery(queryParams.get("debug"), false),
+  controlsVisibility: parseBooleanQuery(queryParams.get("controls"), false),
 };
+
+function setControlsVisibility() {
+  const visibility = runtimeConfig.controlsVisibility;
+  document.getElementById("controls")?.classList.toggle("on", visibility);
+}
 
 function getActiveColorClasses() {
   if (runtimeConfig.colorMode === "black") return ["black"];
@@ -356,13 +374,16 @@ function buildClonePlan(cellCount, cols) {
 
     if (leftIndex >= 0) {
       excludedMotifs.push(plan[leftIndex].motifIndex);
-      if (enforceColorAdjacency)
+      if (enforceColorAdjacency && plan[leftIndex].colorClass !== "black") {
         excludedColors.push(plan[leftIndex].colorClass);
+      }
     }
 
     if (upIndex >= 0) {
       excludedMotifs.push(plan[upIndex].motifIndex);
-      if (enforceColorAdjacency) excludedColors.push(plan[upIndex].colorClass);
+      if (enforceColorAdjacency && plan[upIndex].colorClass !== "black") {
+        excludedColors.push(plan[upIndex].colorClass);
+      }
     }
 
     const motifIndex = pickKeyFromQuota(motifQuota, excludedMotifs);
@@ -434,7 +455,9 @@ function conflictsWithNearbyStyles(candidate, placed, adjacencyMultiplier) {
     if (distance > adjacencyRadius) continue;
 
     if (candidate.motifIndex === other.motifIndex) return true;
-    if (candidate.colorClass === other.colorClass) return true;
+
+    const sameColor = candidate.colorClass === other.colorClass;
+    if (sameColor && candidate.colorClass !== "black") return true;
   }
   return false;
 }
@@ -456,10 +479,23 @@ function intersectsPlaced(candidate, placed, marginRatio) {
   return false;
 }
 
-function placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight) {
+function placeClonesPoissonConstrained(
+  clones,
+  viewportWidth,
+  viewportHeight,
+  options = {},
+) {
+  const strictNoOverlap = Boolean(options.strictNoOverlap);
+  const enforceStyleAdjacency = options.enforceStyleAdjacency !== false;
+  const placedClones = [];
   const placed = [];
-  const marginRatios = [0.22, 0.16, 0.11, 0.07, 0.035, 0];
-  const adjacencyMultipliers = [1.2, 1.05, 0.9, 0.78, 0.66, 0.55];
+  const marginRatios = strictNoOverlap
+    ? [0.2, 0.16, 0.12, 0.1, 0.08, 0.06]
+    : [0.22, 0.16, 0.11, 0.07, 0.035, 0];
+  const adjacencyMultipliers = strictNoOverlap
+    ? [0.8, 0.7, 0.6, 0.5, 0.4, 0.3]
+    : [1.2, 1.05, 0.9, 0.78, 0.66, 0.55];
+  const attemptsPerLevel = strictNoOverlap ? 520 : 260;
 
   clones.forEach((clone) => {
     const width = parseFloat(clone.style.width) || 80;
@@ -482,13 +518,16 @@ function placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight) {
       const marginRatio = marginRatios[level];
       const adjacencyMultiplier = adjacencyMultipliers[level];
 
-      for (let attempt = 0; attempt < 260; attempt += 1) {
+      for (let attempt = 0; attempt < attemptsPerLevel; attempt += 1) {
         const x = minX + Math.random() * (maxX - minX || 1);
         const y = minY + Math.random() * (maxY - minY || 1);
         const candidate = { x, y, width, height, motifIndex, colorClass };
 
         if (intersectsPlaced(candidate, placed, marginRatio)) continue;
-        if (conflictsWithNearbyStyles(candidate, placed, adjacencyMultiplier))
+        if (
+          enforceStyleAdjacency &&
+          conflictsWithNearbyStyles(candidate, placed, adjacencyMultiplier)
+        )
           continue;
 
         selectedPoint = candidate;
@@ -496,7 +535,7 @@ function placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight) {
       }
     }
 
-    if (!selectedPoint) {
+    if (!selectedPoint && !strictNoOverlap) {
       selectedPoint = {
         x: minX + Math.random() * (maxX - minX || 1),
         y: minY + Math.random() * (maxY - minY || 1),
@@ -507,7 +546,12 @@ function placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight) {
       };
     }
 
+    if (!selectedPoint) {
+      return;
+    }
+
     placed.push(selectedPoint);
+    placedClones.push(clone);
     clone.style.setProperty("--motif-left", `${selectedPoint.x}px`);
     clone.style.setProperty("--motif-top", `${selectedPoint.y}px`);
 
@@ -515,9 +559,15 @@ function placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight) {
       clone.title = `motif:${motifIndex + 1} | color:${colorClass} | x:${Math.round(selectedPoint.x)} y:${Math.round(selectedPoint.y)}`;
     }
   });
+
+  return placedClones;
 }
 
-function getBalancedCloneCount(maxCount, viewportWidth, viewportHeight) {
+function getBalancedCloneCount(requestedCloneCount, viewportWidth, viewportHeight) {
+  if (Number.isFinite(requestedCloneCount) && requestedCloneCount > 0) {
+    return Math.max(1, Math.floor(requestedCloneCount));
+  }
+
   const sampleScale = runtimeConfig.gridScale;
   const avgArea =
     motifTemplates.reduce((sum, motif) => {
@@ -527,12 +577,30 @@ function getBalancedCloneCount(maxCount, viewportWidth, viewportHeight) {
     }, 0) / Math.max(1, motifTemplates.length);
 
   const availableArea = viewportWidth * viewportHeight;
-  const densityFactor = 0.24;
+  const densityFactor = runtimeConfig.density;
+
+  if (densityFactor <= 0) {
+    const optimizedTarget = Math.floor(
+      availableArea / Math.max(1, avgArea * 1.32),
+    );
+    return Math.max(18, Math.min(520, optimizedTarget));
+  }
+
   const targetCount = Math.floor(
     (availableArea * densityFactor) / Math.max(1, avgArea),
   );
+  const scaleBoost = Math.max(0.55, Math.min(1.8, 0.35 / sampleScale));
+  const autoMaxCount = Math.round(
+    Math.max(90, Math.min(520, (availableArea / 12000) * scaleBoost)),
+  );
+  const upperBound = autoMaxCount;
 
-  return Math.max(16, Math.min(maxCount, targetCount));
+  const adaptiveMinCount = Math.max(
+    8,
+    Math.min(32, Math.round(availableArea / 110000)),
+  );
+
+  return Math.max(adaptiveMinCount, Math.min(upperBound, targetCount));
 }
 
 function applyMotif1Sequence(clone, bloomDelay) {
@@ -929,6 +997,8 @@ function generateRandomMotifs(count = runtimeConfig.cloneCount) {
   clearCycleTimers();
   pattern.innerHTML = "";
   const { width: viewportWidth, height: viewportHeight } = getPatternViewport();
+  const optimizedAutoMode =
+    (!Number.isFinite(count) || count === 0) && runtimeConfig.density === 0;
   const targetCount = getBalancedCloneCount(
     count,
     viewportWidth,
@@ -953,8 +1023,16 @@ function generateRandomMotifs(count = runtimeConfig.cloneCount) {
     clones.push(clone);
   });
 
-  placeClonesPoissonConstrained(clones, viewportWidth, viewportHeight);
-  clones.forEach((clone) => pattern.appendChild(clone));
+  const placedClones = placeClonesPoissonConstrained(
+    clones,
+    viewportWidth,
+    viewportHeight,
+    {
+      strictNoOverlap: optimizedAutoMode,
+      enforceStyleAdjacency: true,
+    },
+  );
+  placedClones.forEach((clone) => pattern.appendChild(clone));
 }
 
 function showAllMotifs() {
@@ -1028,6 +1106,7 @@ window.addEventListener("DOMContentLoaded", () => {
     document.body.dataset.debugPlacement = "true";
   }
   showAllMotifs();
+  setControlsVisibility();
 });
 
 window.addEventListener("resize", () => {
