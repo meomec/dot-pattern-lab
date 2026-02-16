@@ -1,10 +1,10 @@
-# Eames — Motifs SVG animés
+# Dot Pattern — Motifs SVG animés
 
-Projet front statique (HTML/CSS/JS vanilla) pour générer un champ de motifs inspirés Eames, avec séquences d’animation par élément, placement contraint et configuration par URL.
+Projet front statique (HTML/CSS/JS vanilla) pour générer un champ de motifs inspirés du Dot pattern de Charles Eames, avec séquences d’animation par élément, placement contraint et configuration par URL.
 
 ## Aperçu
 
-- 6 motifs SVG segmentés (`motif-1` à `motif-6`)
+- 6 motifs SVG segmentés
 - animations séquencées par branches/disques selon le motif
 - génération multi-clones avec placement type Poisson-disc contraint
 - contraintes d’adjacence : éviter voisins de même motif et/ou même couleur
