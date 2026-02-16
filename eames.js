@@ -3,7 +3,9 @@ const DEFAULT_DENSITY = 0;
 const selector = document.getElementById("motif-selector");
 const cloneCountInput = document.getElementById("clone-count-input");
 const gridScaleInput = document.getElementById("grid-scale-input");
+const gridScaleValue = document.getElementById("grid-scale-value");
 const densityInput = document.getElementById("density-input");
+const densityValue = document.getElementById("density-value");
 const colorModeInputs = Array.from(
   document.querySelectorAll('input[name="color-mode-input"]'),
 );
@@ -97,6 +99,22 @@ function setDebugMode() {
   delete document.body.dataset.debugPlacement;
 }
 
+function formatControlNumber(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "0";
+  return parsed.toFixed(2);
+}
+
+function syncRangeValueDisplays() {
+  if (gridScaleInput && gridScaleValue) {
+    gridScaleValue.textContent = formatControlNumber(gridScaleInput.value);
+  }
+
+  if (densityInput && densityValue) {
+    densityValue.textContent = formatControlNumber(densityInput.value);
+  }
+}
+
 function syncControlsInputsFromRuntime() {
   if (cloneCountInput) {
     cloneCountInput.value = String(runtimeConfig.cloneCount ?? 0);
@@ -119,6 +137,8 @@ function syncControlsInputsFromRuntime() {
   if (debugInput) {
     debugInput.checked = runtimeConfig.debugPlacement;
   }
+
+  syncRangeValueDisplays();
 
 }
 
@@ -161,6 +181,7 @@ function applyRuntimeConfigFromControls() {
   runtimeConfig.colorMode = parseColorMode(selectedColorModeInput?.value);
   runtimeConfig.debugPlacement = Boolean(debugInput?.checked);
 
+  syncRangeValueDisplays();
   syncControlsInputsFromRuntime();
   setDebugMode();
   setControlsVisibility();
@@ -186,6 +207,10 @@ function bindControlsAutoApply() {
 
   autoApplyFields.forEach((field) => {
     field.addEventListener("change", applyRuntimeConfigFromControls);
+  });
+
+  [gridScaleInput, densityInput].filter(Boolean).forEach((field) => {
+    field.addEventListener("input", applyRuntimeConfigFromControls);
   });
 
   if (controlsCloseButton) {

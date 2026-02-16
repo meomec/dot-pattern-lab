@@ -19,7 +19,7 @@ body {
   right: 20px;
   background: white;
   padding: 15px 20px;
-  border-radius: 8px;
+  border-radius: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
   width: min(92vw, 360px);
@@ -46,6 +46,12 @@ body {
   color: #111;
 }
 
+.controls-title {
+  color: #111;
+  margin: 0;
+  font-size: 16px;
+}
+
 .controls label {
   font-weight: bold;
   color: #333;
@@ -64,7 +70,7 @@ body {
 .controls input[type="number"] {
   padding: 8px 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 14px;
   background-color: white;
   width: 100%;
@@ -73,6 +79,25 @@ body {
 
 .controls input[type="checkbox"] {
   justify-self: start;
+}
+
+.range-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-control input[type="range"] {
+  width: 100%;
+  margin: 0;
+}
+
+.range-control output {
+  min-width: 38px;
+  text-align: right;
+  font-size: 12px;
+  color: #555;
 }
 
 .controls select:hover,
