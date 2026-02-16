@@ -455,21 +455,24 @@ body {
 
 @keyframes m1GrowDiscBourgeon {
   0%   { opacity: 0; transform: scale(0.05); }
-  12%  { opacity: 1; transform: scale(1); }
+  5%   { opacity: 0; transform: scale(0.05); }
+  17%  { opacity: 1; transform: scale(1); }
   97%  { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(1); }
 }
 
 @keyframes m1GrowBranchY {
   0%   { opacity: 0; transform: scaleY(0.05); }
-  3.5% { opacity: 1; transform: scaleY(1); }
+  5%   { opacity: 0; transform: scaleY(0.05); }
+  13%  { opacity: 1; transform: scaleY(1); }
   97%  { opacity: 1; transform: scaleY(1); }
   100% { opacity: 0; transform: scaleY(1); }
 }
 
 @keyframes m1GrowBranchX {
   0%   { opacity: 0; transform: scaleX(0.05); }
-  3.5% { opacity: 1; transform: scaleX(1); }
+  5%   { opacity: 0; transform: scaleX(0.05); }
+  13%  { opacity: 1; transform: scaleX(1); }
   97%  { opacity: 1; transform: scaleX(1); }
   100% { opacity: 0; transform: scaleX(1); }
 }
@@ -563,21 +566,24 @@ body {
 
 @keyframes m2GrowBranchY {
   0%   { opacity: 0; transform: scaleY(0.05); }
-  3.5% { opacity: 1; transform: scaleY(1); }
+  5%   { opacity: 0; transform: scaleY(0.05); }
+  13%  { opacity: 1; transform: scaleY(1); }
   97%  { opacity: 1; transform: scaleY(1); }
   100% { opacity: 0; transform: scaleY(1); }
 }
 
 @keyframes m2GrowBranchX {
   0%   { opacity: 0; transform: scaleX(0.05); }
-  3.5% { opacity: 1; transform: scaleX(1); }
+  5%   { opacity: 0; transform: scaleX(0.05); }
+  13%  { opacity: 1; transform: scaleX(1); }
   97%  { opacity: 1; transform: scaleX(1); }
   100% { opacity: 0; transform: scaleX(1); }
 }
 
 @keyframes m2GrowDiscBourgeon {
   0%   { opacity: 0; transform: scale(0.05); }
-  12%  { opacity: 1; transform: scale(1); }
+  5%   { opacity: 0; transform: scale(0.05); }
+  17%  { opacity: 1; transform: scale(1); }
   97%  { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(1); }
 }
@@ -698,21 +704,24 @@ body {
 
 @keyframes m3GrowBranchY {
   0%   { opacity: 0; transform: scaleY(0.05); }
-  3.5% { opacity: 1; transform: scaleY(1); }
+  5%   { opacity: 0; transform: scaleY(0.05); }
+  13%  { opacity: 1; transform: scaleY(1); }
   97%  { opacity: 1; transform: scaleY(1); }
   100% { opacity: 0; transform: scaleY(1); }
 }
 
 @keyframes m3GrowBranchX {
   0%   { opacity: 0; transform: scaleX(0.05); }
-  3.5% { opacity: 1; transform: scaleX(1); }
+  5%   { opacity: 0; transform: scaleX(0.05); }
+  13%  { opacity: 1; transform: scaleX(1); }
   97%  { opacity: 1; transform: scaleX(1); }
   100% { opacity: 0; transform: scaleX(1); }
 }
 
 @keyframes m3GrowDiscBourgeon {
   0%   { opacity: 0; transform: scale(0.05); }
-  12%  { opacity: 1; transform: scale(1); }
+  5%   { opacity: 0; transform: scale(0.05); }
+  17%  { opacity: 1; transform: scale(1); }
   97%  { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(1); }
 }
@@ -807,21 +816,24 @@ body {
 
 @keyframes m4GrowBranchY {
   0%   { opacity: 0; transform: scaleY(0.05); }
-  3.5% { opacity: 1; transform: scaleY(1); }
+  5%   { opacity: 0; transform: scaleY(0.05); }
+  13%  { opacity: 1; transform: scaleY(1); }
   97%  { opacity: 1; transform: scaleY(1); }
   100% { opacity: 0; transform: scaleY(1); }
 }
 
 @keyframes m4GrowBranchX {
   0%   { opacity: 0; transform: scaleX(0.05); }
-  3.5% { opacity: 1; transform: scaleX(1); }
+  5%   { opacity: 0; transform: scaleX(0.05); }
+  13%  { opacity: 1; transform: scaleX(1); }
   97%  { opacity: 1; transform: scaleX(1); }
   100% { opacity: 0; transform: scaleX(1); }
 }
 
 @keyframes m4GrowDiscBourgeon {
   0%   { opacity: 0; transform: scale(0.05); }
-  12%  { opacity: 1; transform: scale(1); }
+  5%   { opacity: 0; transform: scale(0.05); }
+  17%  { opacity: 1; transform: scale(1); }
   97%  { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(1); }
 }
@@ -873,7 +885,7 @@ body {
 .motif-type-5 #branch8,
 .motif-type-5 #branch9 {
   transform-box: fill-box;
-  animation: m5GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation: m5GrowBranchXLevel2 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
   opacity: 0;
 }
@@ -881,9 +893,19 @@ body {
 .motif-type-5 #branch2,
 .motif-type-5 #branch5 {
   transform-box: fill-box;
-  animation: m5GrowBranchY var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation: m5GrowBranchYLevel2 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
   opacity: 0;
+}
+
+.motif-type-5 #branch1 {
+  animation: m5GrowBranchXLevel1 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+}
+
+.motif-type-5 #branch6,
+.motif-type-5 #branch7,
+.motif-type-5 #branch3 {
+  animation: m5GrowBranchXLevel3 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
 }
 
 .motif-type-5 #branch1 { transform-origin: var(--m5-branch1-origin); }
@@ -912,9 +934,18 @@ body {
 .motif-type-5 #disc7,
 .motif-type-5 #disc8 {
   transform-box: view-box;
-  animation: m5GrowDiscBourgeon var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation: m5GrowDiscLevel3 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
   opacity: 0;
+}
+
+.motif-type-5 #disc2 {
+  animation: m5GrowDiscLevel2 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+}
+
+.motif-type-5 #disc5,
+.motif-type-5 #disc6 {
+  animation: m5GrowDiscLevel4 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
 }
 
 .motif-type-5 #disc2 { transform-origin: var(--m5-disc2-origin); }
@@ -933,21 +964,80 @@ body {
 
 @keyframes m5GrowBranchY {
   0%   { opacity: 0; transform: scaleY(0.05); }
-  3.5% { opacity: 1; transform: scaleY(1); }
+  5%   { opacity: 0; transform: scaleY(0.05); }
+  13%  { opacity: 1; transform: scaleY(1); }
   97%  { opacity: 1; transform: scaleY(1); }
   100% { opacity: 0; transform: scaleY(1); }
 }
 
 @keyframes m5GrowBranchX {
   0%   { opacity: 0; transform: scaleX(0.05); }
-  3.5% { opacity: 1; transform: scaleX(1); }
+  5%   { opacity: 0; transform: scaleX(0.05); }
+  13%  { opacity: 1; transform: scaleX(1); }
+  97%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+@keyframes m5GrowBranchXLevel1 {
+  0%   { opacity: 0; transform: scaleX(0.05); }
+  5%   { opacity: 0; transform: scaleX(0.05); }
+  13%  { opacity: 1; transform: scaleX(1); }
+  97%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+@keyframes m5GrowBranchYLevel2 {
+  0%   { opacity: 0; transform: scaleY(0.05); }
+  13%  { opacity: 0; transform: scaleY(0.05); }
+  21%  { opacity: 1; transform: scaleY(1); }
+  97%  { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+
+@keyframes m5GrowBranchXLevel2 {
+  0%   { opacity: 0; transform: scaleX(0.05); }
+  13%  { opacity: 0; transform: scaleX(0.05); }
+  21%  { opacity: 1; transform: scaleX(1); }
+  97%  { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+@keyframes m5GrowBranchXLevel3 {
+  0%   { opacity: 0; transform: scaleX(0.05); }
+  21%  { opacity: 0; transform: scaleX(0.05); }
+  29%  { opacity: 1; transform: scaleX(1); }
   97%  { opacity: 1; transform: scaleX(1); }
   100% { opacity: 0; transform: scaleX(1); }
 }
 
 @keyframes m5GrowDiscBourgeon {
   0%   { opacity: 0; transform: scale(0.05); }
-  12%  { opacity: 1; transform: scale(1); }
+  5%   { opacity: 0; transform: scale(0.05); }
+  17%  { opacity: 1; transform: scale(1); }
+  97%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes m5GrowDiscLevel2 {
+  0%   { opacity: 0; transform: scale(0.05); }
+  13%  { opacity: 0; transform: scale(0.05); }
+  25%  { opacity: 1; transform: scale(1); }
+  97%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes m5GrowDiscLevel3 {
+  0%   { opacity: 0; transform: scale(0.05); }
+  21%  { opacity: 0; transform: scale(0.05); }
+  33%  { opacity: 1; transform: scale(1); }
+  97%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes m5GrowDiscLevel4 {
+  0%   { opacity: 0; transform: scale(0.05); }
+  29%  { opacity: 0; transform: scale(0.05); }
+  41%  { opacity: 1; transform: scale(1); }
   97%  { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(1); }
 }
@@ -957,10 +1047,9 @@ body {
    ========================= */
 .motif-type-6 {
   --m6-disc1-origin: 22.3px 47.8px;
-  --m6-tree-origin: left center;
   --m6-disc2-origin: 46.5px 21.6px;
   --m6-disc3-origin: 51.5px 66.2px;
-  --m6-branch1-origin: 34px 45.1px;
+  --m6-branch1-origin: left center;
   --m6-branch2-origin: 51.6px 45.4px;
   --m6-branch3-origin: 38.7px 46.5px;
   --assembly-origin: center center;
@@ -980,11 +1069,6 @@ body {
   animation-delay: var(--bloom-delay, 0s);
   animation-fill-mode: both;
   opacity: 0;
-}
-
-.motif-type-6 #tree {
-  animation: none;
-  opacity: 1;
 }
 
 .motif-type-6 #branch1 {
@@ -1042,43 +1126,16 @@ body {
   }
 }
 
-@keyframes m6GrowTree {
-  0% {
-    opacity: 0;
-    transform: scaleX(0.05) scaleY(0.05);
-  }
-  12% {
-    opacity: 1;
-    transform: scaleX(1) scaleY(0.05);
-  }
-  24% {
-    opacity: 1;
-    transform: scaleX(1) scaleY(1);
-  }
-  70% {
-    opacity: 1;
-    transform: scaleX(1) scaleY(1);
-  }
-  75% {
-    opacity: 1;
-    transform: scaleX(1) scaleY(0.05);
-  }
-  85% {
-    opacity: 0;
-    transform: scaleX(0.05) scaleY(0.05);
-  }
-  100% {
-    opacity: 0;
-    transform: scaleX(0.05) scaleY(0.05);
-  }
-}
-
 @keyframes m6GrowBranch1 {
   0% {
     opacity: 0;
     transform: scaleX(0.05);
   }
-  3.5% {
+  5% {
+    opacity: 0;
+    transform: scaleX(0.05);
+  }
+  13% {
     opacity: 1;
     transform: scaleX(1);
   }
@@ -1097,7 +1154,11 @@ body {
     opacity: 0;
     transform: scaleY(0.05);
   }
-  3.5% {
+  5% {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+  13% {
     opacity: 1;
     transform: scaleY(1);
   }
@@ -1116,7 +1177,11 @@ body {
     opacity: 0;
     transform: scaleY(0.05);
   }
-  3.5% {
+  5% {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+  13% {
     opacity: 1;
     transform: scaleY(1);
   }
@@ -1135,7 +1200,11 @@ body {
     opacity: 0;
     transform: scale(0.05);
   }
-  4.5% {
+  5% {
+    opacity: 0;
+    transform: scale(0.05);
+  }
+  9.5% {
     opacity: 1;
     transform: scale(1);
   }
@@ -1154,7 +1223,11 @@ body {
     opacity: 0;
     transform: scale(0.05);
   }
-  4.5% {
+  5% {
+    opacity: 0;
+    transform: scale(0.05);
+  }
+  9.5% {
     opacity: 1;
     transform: scale(1);
   }
@@ -1167,3 +1240,4 @@ body {
     transform: scale(1);
   }
 }
+
