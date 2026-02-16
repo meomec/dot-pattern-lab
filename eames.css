@@ -29,6 +29,23 @@ body {
   display: block;
 }
 
+.controls-close {
+  position: absolute;
+  top: 0px;
+  right: 3px;
+  border: 0;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 2px 4px;
+}
+
+.controls-close:hover {
+  color: #111;
+}
+
 .controls label {
   font-weight: bold;
   color: #333;
@@ -40,6 +57,7 @@ body {
   grid-template-columns: 108px minmax(0, 1fr);
   gap: 8px 10px;
   align-items: center;
+  margin-top: 8px;
 }
 
 .controls select,
