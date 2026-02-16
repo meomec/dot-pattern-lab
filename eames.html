@@ -29,19 +29,24 @@
 				<label for="density-input">Densite</label>
 				<input id="density-input" type="number" min="0" max="1.2" step="0.05">
 
-				<label for="color-mode-input">Mode</label>
-				<select id="color-mode-input">
-					<option value="color">couleur</option>
-					<option value="black">n&b</option>
-				</select>
+				<label>Mode</label>
+				<div id="color-mode-input">
+					<label for="color-mode-input-color">
+						<input id="color-mode-input-color" type="radio" name="color-mode-input" value="color">
+						couleur
+					</label>
+					<label for="color-mode-input-black">
+						<input id="color-mode-input-black" type="radio" name="color-mode-input" value="black">
+						n&b
+					</label>
+				</div>
 
-				<label for="debug-input">debug</label>
+				<label for="debug-input">Debug</label>
 				<input id="debug-input" type="checkbox">
 
-				<label for="controls-visible-input">controls</label>
+				<label for="controls-visible-input">Controls</label>
 				<input id="controls-visible-input" type="checkbox">
 			</div>
-			<button id="apply-controls" type="button">Appliquer</button>
 		</div>
 
 		<div class="pattern">

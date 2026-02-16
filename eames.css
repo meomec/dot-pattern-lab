@@ -62,21 +62,6 @@ body {
   border-color: #999;
 }
 
-#apply-controls {
-  margin-top: 12px;
-  width: 100%;
-  padding: 9px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-#apply-controls:hover {
-  border-color: #999;
-}
-
 .pattern {
   position: relative;
   min-height: 100vh;
