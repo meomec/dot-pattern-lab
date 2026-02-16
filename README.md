@@ -7,10 +7,10 @@ Ambiance actuelle : placement intelligent, animation séquencée, contraintes d�
 ## ✨ Ce que fait le projet
 
 - 6 motifs SVG segmentés et animés
-- séquences de croissance dédiées par motif (`applyMotif1Sequence` → `applyMotif6Sequence`)
+- séquences de croissance dédiées par motif
 - génération multi-clones avec placement contraint de type Poisson
 - évite les voisins trop proches de même motif
-- évite les voisins de même couleur **sauf noir** (le noir peut être côte à côte)
+- évite les voisins de même couleur **sauf noir**
 - fréquences pondérées respectées (motifs + couleurs)
 - mode focus (single motif) via le sélecteur
 
@@ -32,19 +32,17 @@ Ambiance actuelle : placement intelligent, animation séquencée, contraintes d�
 ## 🚀 Lancement
 
 1. Ouvrir `eames.html` dans un navigateur.
-2. Utiliser le sélecteur en haut à droite (`Tous les motifs` / `Motif X`).
-3. Ajuster les paramètres via le panneau de contrôle (application automatique) ou via l’URL.
+2. Ajuster les paramètres via le panneau de contrôle (application automatique) ou via l’URL.
 
 ## 🎛️ Panneau de contrôle
 
 Le panneau intègre les mêmes options que les query params :
 
 - `N` (nombre de clones)
-- `Échelle` (`scale`)
-- `Densite` (`density`)
-- `Mode` (radio : `couleur` / `n&b`)
-- `debug`
-- `controls`
+- `Échelle` (`taille des motifs`)
+- `Densite` (`marge entre les motifs`)
+- `Mode` (`couleur` / `n&b`)
+- `Debug`
 
 Chaque changement est appliqué automatiquement (pas de bouton “Appliquer”).
 
@@ -58,20 +56,20 @@ Tous les réglages sont runtime via query params.
 - `n>0` → **override strict** du nombre de clones
 - si absent/invalide → mode auto
 
-### `density` (alias `densite`)
+### `densite`
 
 - borne : `0` à `1.2`
 - défaut : `0`
 - `densite=0` + `n=0` → mode auto **optimisé** (remplissage max sans chevauchement forcé)
 - `densite>0` + `n=0` → auto piloté par densité
 
-### `scale` (alias legacy `gridScale`)
+### `scale`
 
 - borne : `0.05` à `1.2`
 - défaut : `0.75`
 - ajuste la taille des clones
 
-### `color` (aliases legacy `colorMode`, `couleur`)
+### `color`
 
 - `color` (défaut) : palette pondérée complète
 - `black` / `noir` : noir uniquement
@@ -97,7 +95,7 @@ Tous les réglages sont runtime via query params.
 
 URL de preview (repo actuel) :
 
-[Ouvrir la preview](https://meomec.github.io/dot-pattern-lab/eames.html?controls=1)
+`https://meomec.github.io/dot-pattern-lab/eames.html?controls=1`
 
 ## 🧠 Logique de génération (résumé)
 
