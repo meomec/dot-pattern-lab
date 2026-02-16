@@ -265,6 +265,17 @@ body {
   animation-fill-mode: both;
 }
 
+.motif-type-1 .assembly-collapse,
+.motif-type-2 .assembly-collapse,
+.motif-type-3 .assembly-collapse,
+.motif-type-4 .assembly-collapse,
+.motif-type-5 .assembly-collapse,
+.motif-type-6 .assembly-collapse {
+  animation: none;
+  opacity: 1;
+  transform: scale(1);
+}
+
 @keyframes assemblyCollapse {
   0% {
     opacity: 0;
@@ -282,9 +293,33 @@ body {
     opacity: 1;
     transform: scale(1);
   }
-  97% {
+  95% {
     opacity: 1;
-    transform: scale(var(--assembly-pop-scale, 1.08));
+    transform: scale(1);
+  }
+  97.8% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  98.3% {
+    opacity: 1;
+    transform: scale(calc(1 + (var(--assembly-pop-scale, 1.08) - 1) * 0.55));
+  }
+  98.9% {
+    opacity: 0.96;
+    transform: scale(calc(1 + (var(--assembly-pop-scale, 1.08) - 1) * 0.3));
+  }
+  99.3% {
+    opacity: 0.82;
+    transform: scale(0.72);
+  }
+  99.65% {
+    opacity: 0.58;
+    transform: scale(0.5);
+  }
+  99.85% {
+    opacity: 0.3;
+    transform: scale(0.28);
   }
   100% {
     opacity: 0;
@@ -313,7 +348,9 @@ body {
 }
 
 .motif-type-1 svg {
-  animation: none;
+  animation: assemblyCollapse var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: var(--bloom-delay, 0s);
+  animation-fill-mode: both;
   opacity: 1;
 }
 
@@ -453,7 +490,9 @@ body {
 }
 
 .motif-type-2 svg {
-  animation: none;
+  animation: assemblyCollapse var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: var(--bloom-delay, 0s);
+  animation-fill-mode: both;
   opacity: 1;
 }
 
@@ -563,7 +602,9 @@ body {
 }
 
 .motif-type-3 svg {
-  animation: none;
+  animation: assemblyCollapse var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: var(--bloom-delay, 0s);
+  animation-fill-mode: both;
   opacity: 1;
 }
 
@@ -680,19 +721,21 @@ body {
    Motif 4 overrides (eames_04)
    ========================= */
 .motif-type-4 {
-  --m4-disc1-origin: 56.3px 20.5px;
-  --m4-disc2-origin: 89.6px 74.1px;
+  --m4-disc1-origin: 52.6px 20.5px;
+  --m4-disc2-origin: 90px 69.2px;
   --m4-disc3-origin: 59.1px 109.4px;
-  --m4-disc4-origin: 21.6px 68.9px;
-  --m4-branch1-origin: 59px 71.8px;
-  --m4-branch2-origin: 56.3px 20.5px;
-  --m4-branch3-origin: 55.2px 71.8px;
+  --m4-disc4-origin: 22.8px 73.9px;
+  --m4-branch1-origin: left center;
+  --m4-branch2-origin: top center;
+  --m4-branch3-origin: right center;
   --assembly-origin: center center;
   --assembly-pop-scale: 1.08;
 }
 
 .motif-type-4 svg {
-  animation: none;
+  animation: assemblyCollapse var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: var(--bloom-delay, 0s);
+  animation-fill-mode: both;
   opacity: 1;
 }
 
@@ -710,7 +753,7 @@ body {
 }
 
 .motif-type-4 #branch1 {
-  transform-box: view-box;
+  transform-box: fill-box;
   transform-origin: var(--m4-branch1-origin);
   animation: m4GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
@@ -718,7 +761,7 @@ body {
 }
 
 .motif-type-4 #branch2 {
-  transform-box: view-box;
+  transform-box: fill-box;
   transform-origin: var(--m4-branch2-origin);
   animation: m4GrowBranchY var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
@@ -726,7 +769,7 @@ body {
 }
 
 .motif-type-4 #branch3 {
-  transform-box: view-box;
+  transform-box: fill-box;
   transform-origin: var(--m4-branch3-origin);
   animation: m4GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
@@ -787,15 +830,15 @@ body {
    Motif 5 overrides (eames_05)
    ========================= */
 .motif-type-5 {
-  --m5-branch1-origin: 23.1px 54.8px;
-  --m5-branch2-origin: 109.4px 16.9px;
-  --m5-branch3-origin: 106.7px 7.8px;
-  --m5-branch4-origin: 80.9px 7.9px;
-  --m5-branch5-origin: 108.3px 54.6px;
-  --m5-branch6-origin: 112.3px 137.5px;
-  --m5-branch7-origin: 82.9px 143.3px;
-  --m5-branch8-origin: 106.7px 96.8px;
-  --m5-branch9-origin: 122.2px 77.7px;
+  --m5-branch1-origin: left center;
+  --m5-branch2-origin: center bottom;
+  --m5-branch3-origin: left center;
+  --m5-branch4-origin: right center;
+  --m5-branch5-origin: center top;
+  --m5-branch6-origin: left center;
+  --m5-branch7-origin: right center;
+  --m5-branch8-origin: right center;
+  --m5-branch9-origin: left center;
 
   --m5-disc1-origin: 23.1px 54.8px;
   --m5-disc2-origin: 160.7px 51.3px;
@@ -811,7 +854,9 @@ body {
 }
 
 .motif-type-5 svg {
-  animation: none;
+  animation: assemblyCollapse var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: var(--bloom-delay, 0s);
+  animation-fill-mode: both;
   opacity: 1;
 }
 
@@ -827,7 +872,7 @@ body {
 .motif-type-5 #branch7,
 .motif-type-5 #branch8,
 .motif-type-5 #branch9 {
-  transform-box: view-box;
+  transform-box: fill-box;
   animation: m5GrowBranchX var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
   opacity: 0;
@@ -835,33 +880,21 @@ body {
 
 .motif-type-5 #branch2,
 .motif-type-5 #branch5 {
-  transform-box: view-box;
+  transform-box: fill-box;
   animation: m5GrowBranchY var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
   opacity: 0;
 }
 
 .motif-type-5 #branch1 { transform-origin: var(--m5-branch1-origin); }
-.motif-type-5 #branch2 {
-  transform-box: fill-box;
-  transform-origin: center bottom;
-}
+.motif-type-5 #branch2 { transform-origin: var(--m5-branch2-origin); }
 .motif-type-5 #branch3 { transform-origin: var(--m5-branch3-origin); }
-.motif-type-5 #branch4 {
-  transform-box: fill-box;
-  transform-origin: right center;
-}
+.motif-type-5 #branch4 { transform-origin: var(--m5-branch4-origin); }
 .motif-type-5 #branch5 { transform-origin: var(--m5-branch5-origin); }
 .motif-type-5 #branch6 { transform-origin: var(--m5-branch6-origin); }
-.motif-type-5 #branch7 {
-  transform-box: fill-box;
-  transform-origin: right center;
-}
+.motif-type-5 #branch7 { transform-origin: var(--m5-branch7-origin); }
 .motif-type-5 #branch8 { transform-origin: var(--m5-branch8-origin); }
-.motif-type-5 #branch9 {
-  transform-box: fill-box;
-  transform-origin: left center;
-}
+.motif-type-5 #branch9 { transform-origin: var(--m5-branch9-origin); }
 
 .motif-type-5 #disc1 {
   transform-box: view-box;
@@ -923,19 +956,21 @@ body {
    Motif 6 overrides
    ========================= */
 .motif-type-6 {
-  --m6-disc1-origin: 30.368px 44.093px;
+  --m6-disc1-origin: 22.3px 47.8px;
   --m6-tree-origin: left center;
-  --m6-disc2-origin: bottom center;
-  --m6-disc3-origin: top center;
-  --m6-branch1-origin: left center;
-  --m6-branch2-origin: bottom center;
-  --m6-branch3-origin: top center;
+  --m6-disc2-origin: 46.5px 21.6px;
+  --m6-disc3-origin: 51.5px 66.2px;
+  --m6-branch1-origin: 34px 45.1px;
+  --m6-branch2-origin: 51.6px 45.4px;
+  --m6-branch3-origin: 38.7px 46.5px;
   --assembly-origin: center center;
   --assembly-pop-scale: 1.08;
 }
 
 .motif-type-6 svg {
-  animation: none;
+  animation: assemblyCollapse var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
+  animation-delay: var(--bloom-delay, 0s);
+  animation-fill-mode: both;
   opacity: 1;
 }
 
@@ -953,7 +988,7 @@ body {
 }
 
 .motif-type-6 #branch1 {
-  transform-box: fill-box;
+  transform-box: view-box;
   transform-origin: var(--m6-branch1-origin);
   animation: m6GrowBranch1 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
@@ -961,7 +996,7 @@ body {
 }
 
 .motif-type-6 #branch2 {
-  transform-box: fill-box;
+  transform-box: view-box;
   transform-origin: var(--m6-branch2-origin);
   animation: m6GrowBranch2 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
@@ -969,15 +1004,15 @@ body {
 }
 
 .motif-type-6 #branch3 {
-  transform-box: fill-box;
-  transform-origin: top center !important;
+  transform-box: view-box;
+  transform-origin: var(--m6-branch3-origin);
   animation: m6GrowBranch3 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
   opacity: 0;
 }
 
 .motif-type-6 #disc2 {
-  transform-box: fill-box;
+  transform-box: view-box;
   transform-origin: var(--m6-disc2-origin);
   animation: m6GrowDisc2 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
@@ -985,7 +1020,7 @@ body {
 }
 
 .motif-type-6 #disc3 {
-  transform-box: fill-box;
+  transform-box: view-box;
   transform-origin: var(--m6-disc3-origin);
   animation: m6GrowDisc3 var(--cycle-duration, 20s) cubic-bezier(.2,.8,.2,1) infinite;
   animation-fill-mode: both;
