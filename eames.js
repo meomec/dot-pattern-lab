@@ -30,6 +30,11 @@ const colorFrequencies = {
 };
 const colorClasses = Object.keys(colorFrequencies);
 
+/**
+ * Parse le paramètre URL n (nombre de clones) avec validation.
+ * @param {string | null | undefined} value Valeur brute provenant de l'URL.
+ * @returns {number | null} Nombre entier >= 0, ou null si invalide/absent.
+ */
 function parseCloneCountQuery(value) {
   if (value == null || String(value).trim() === "") return null;
   const parsed = parseInt(value, 10);
@@ -37,18 +42,36 @@ function parseCloneCountQuery(value) {
   return parsed;
 }
 
+/**
+ * Parse et borne le facteur d'échelle global des motifs.
+ * @param {string | null | undefined} value Valeur brute (query ou contrôle).
+ * @param {number} fallbackValue Valeur de repli si parsing impossible.
+ * @returns {number} Échelle bornée entre 0.05 et 1.2.
+ */
 function parseGridScale(value, fallbackValue) {
   const parsed = parseFloat(value || "");
   if (!Number.isFinite(parsed)) return fallbackValue;
   return Math.min(1.2, Math.max(0.05, parsed));
 }
 
+/**
+ * Parse et borne la densité utilisée pour le calcul automatique du nombre de clones.
+ * @param {string | null | undefined} value Valeur brute (query ou contrôle).
+ * @param {number} fallbackValue Valeur de repli si parsing impossible.
+ * @returns {number} Densité bornée entre 0 et 1.2.
+ */
 function parseDensity(value, fallbackValue) {
   const parsed = parseFloat(value || "");
   if (!Number.isFinite(parsed)) return fallbackValue;
   return Math.min(1.2, Math.max(0, parsed));
 }
 
+/**
+ * Convertit une chaîne booléenne tolérante en booléen runtime.
+ * @param {string | null | undefined} value Valeur brute (1/0, true/false, yes/no, on/off).
+ * @param {boolean} [fallbackValue=false] Valeur de repli si non reconnue.
+ * @returns {boolean} Booléen normalisé.
+ */
 function parseBooleanQuery(value, fallbackValue = false) {
   if (value == null) return fallbackValue;
   const normalized = String(value).trim().toLowerCase();
@@ -57,6 +80,11 @@ function parseBooleanQuery(value, fallbackValue = false) {
   return fallbackValue;
 }
 
+/**
+ * Normalise le mode couleur depuis l'URL/contrôles.
+ * @param {string | null | undefined} value Valeur brute du mode couleur.
+ * @returns {"color" | "black"} Mode couleur normalisé.
+ */
 function parseColorMode(value) {
   const normalized = String(value || "")
     .trim()
@@ -86,11 +114,17 @@ const runtimeConfig = {
   controlsVisibility: parseBooleanQuery(queryParams.get("controls"), false),
 };
 
+/**
+ * Affiche ou masque le panneau de contrôles selon la configuration runtime.
+ */
 function setControlsVisibility() {
   const visibility = runtimeConfig.controlsVisibility;
   document.getElementById("controls")?.classList.toggle("on", visibility);
 }
 
+/**
+ * Active/désactive les aides de debug de placement sur le document.
+ */
 function setDebugMode() {
   if (runtimeConfig.debugPlacement) {
     document.body.dataset.debugPlacement = "true";
@@ -99,12 +133,20 @@ function setDebugMode() {
   delete document.body.dataset.debugPlacement;
 }
 
+/**
+ * Formate un nombre pour l'affichage dans les labels de sliders.
+ * @param {string | number} value Valeur à afficher.
+ * @returns {string} Chaîne numérique à deux décimales.
+ */
 function formatControlNumber(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return "0";
   return parsed.toFixed(2);
 }
 
+/**
+ * Synchronise les valeurs textuelles affichées à côté des sliders.
+ */
 function syncRangeValueDisplays() {
   if (gridScaleInput && gridScaleValue) {
     gridScaleValue.textContent = formatControlNumber(gridScaleInput.value);
@@ -115,6 +157,9 @@ function syncRangeValueDisplays() {
   }
 }
 
+/**
+ * Recopie la configuration runtime dans les champs du panneau de contrôles.
+ */
 function syncControlsInputsFromRuntime() {
   if (cloneCountInput) {
     cloneCountInput.value = String(runtimeConfig.cloneCount ?? 0);
@@ -142,6 +187,9 @@ function syncControlsInputsFromRuntime() {
 
 }
 
+/**
+ * Synchronise l'URL courante avec la configuration runtime active.
+ */
 function syncQueryFromRuntime() {
   const params = new URLSearchParams(window.location.search);
 
@@ -159,6 +207,9 @@ function syncQueryFromRuntime() {
   window.history.replaceState({}, "", nextUrl);
 }
 
+/**
+ * Lit les contrôles UI, met à jour la config runtime et régénère l'affichage.
+ */
 function applyRuntimeConfigFromControls() {
   if (
     !cloneCountInput ||
@@ -196,6 +247,9 @@ function applyRuntimeConfigFromControls() {
   showSingleMotif(parseInt(value, 10));
 }
 
+/**
+ * Branche les listeners de changement des contrôles avec application immédiate.
+ */
 function bindControlsAutoApply() {
   const autoApplyFields = [
     cloneCountInput,
@@ -222,11 +276,20 @@ function bindControlsAutoApply() {
   }
 }
 
+/**
+ * Retourne la liste des classes couleur autorisées selon le mode actif.
+ * @returns {string[]} Classes couleur utilisables pour le tirage.
+ */
 function getActiveColorClasses() {
   if (runtimeConfig.colorMode === "black") return ["black"];
   return colorClasses;
 }
 
+/**
+ * Retourne le poids de tirage d'une couleur selon le mode actif.
+ * @param {string} colorClass Classe couleur ciblée.
+ * @returns {number} Poids de probabilité (>= 0).
+ */
 function getActiveColorWeight(colorClass) {
   if (runtimeConfig.colorMode === "black") {
     return colorClass === "black" ? 1 : 0;
@@ -234,6 +297,9 @@ function getActiveColorWeight(colorClass) {
   return colorFrequencies[colorClass] || 0;
 }
 
+/**
+ * Nettoie l'état des resets cycliques des clones et stoppe le scheduler.
+ */
 function clearCycleTimers() {
   cloneResetEntries.length = 0;
   if (resetSchedulerId !== null) {
@@ -242,6 +308,9 @@ function clearCycleTimers() {
   }
 }
 
+/**
+ * Démarre le scheduler global de reset d'animation si nécessaire.
+ */
 function ensureResetScheduler() {
   if (resetSchedulerId !== null) return;
 
@@ -272,6 +341,11 @@ function ensureResetScheduler() {
   }, 120);
 }
 
+/**
+ * Convertit une durée CSS (ms/s) en secondes numériques.
+ * @param {string | null | undefined} value Valeur CSS brute.
+ * @returns {number} Durée en secondes (NaN si invalide).
+ */
 function parseDurationToSeconds(value) {
   const input = (value || "").trim();
   if (!input) return NaN;
@@ -287,6 +361,10 @@ function parseDurationToSeconds(value) {
   return parseFloat(input);
 }
 
+/**
+ * Lit la durée de cycle globale depuis la variable CSS --cycle-duration.
+ * @returns {number} Durée de cycle en secondes.
+ */
 function getCycleDurationSeconds() {
   const rootStyles = getComputedStyle(document.documentElement);
   const raw = rootStyles.getPropertyValue("--cycle-duration");
@@ -296,6 +374,10 @@ function getCycleDurationSeconds() {
   return seconds;
 }
 
+/**
+ * Tire un index de motif selon les fréquences pondérées globales.
+ * @returns {number} Index de motif sélectionné.
+ */
 function getWeightedRandomIndex() {
   const totalFrequency = frequencies.reduce((sum, value) => sum + value, 0);
   let random = Math.random() * totalFrequency;
@@ -306,6 +388,11 @@ function getWeightedRandomIndex() {
   return frequencies.length - 1;
 }
 
+/**
+ * Tire un index de motif pondéré en excluant certains indices.
+ * @param {number[]} [excludedIndices=[]] Indices à exclure en priorité.
+ * @returns {number} Index de motif sélectionné.
+ */
 function getWeightedRandomIndexExcluding(excludedIndices = []) {
   const excluded = new Set(excludedIndices);
   const allowed = frequencies
@@ -327,6 +414,10 @@ function getWeightedRandomIndexExcluding(excludedIndices = []) {
   return allowed[allowed.length - 1].index;
 }
 
+/**
+ * Tire une couleur pondérée selon le mode actif (couleur ou noir).
+ * @returns {string} Classe couleur sélectionnée.
+ */
 function getWeightedRandomColorClass() {
   const activeColorClasses = getActiveColorClasses();
   const totalFrequency = activeColorClasses.reduce((sum, colorClass) => {
@@ -342,6 +433,11 @@ function getWeightedRandomColorClass() {
   return activeColorClasses[0] || "black";
 }
 
+/**
+ * Tire une couleur pondérée en excluant certaines classes si possible.
+ * @param {string[]} [excludedColorClasses=[]] Couleurs à éviter.
+ * @returns {string} Classe couleur sélectionnée.
+ */
 function getWeightedRandomColorClassExcluding(excludedColorClasses = []) {
   const excluded = new Set(excludedColorClasses);
   const activeColorClasses = getActiveColorClasses();
@@ -367,6 +463,12 @@ function getWeightedRandomColorClassExcluding(excludedColorClasses = []) {
   return allowed[allowed.length - 1];
 }
 
+/**
+ * Applique le style de base d'un clone (timings, symétrie, rotation, couleur, taille).
+ * @param {HTMLElement} clone Élément clone de motif à configurer.
+ * @param {number} bloomDelay Délai de départ de la séquence d'animation.
+ * @param {string} colorClass Classe couleur forcée (optionnelle via plan).
+ */
 function applyCloneBaseStyle(clone, bloomDelay, colorClass) {
   const cycleDuration = getCycleDurationSeconds();
   const randomDelay = Math.random() * (cycleDuration * 0.15);
@@ -401,6 +503,10 @@ function applyCloneBaseStyle(clone, bloomDelay, colorClass) {
   }
 }
 
+/**
+ * Calcule la zone de rendu disponible pour la pattern en fonction du viewport.
+ * @returns {{width: number, height: number}} Dimensions de la zone de placement.
+ */
 function getPatternViewport() {
   const bodyStyles = getComputedStyle(document.body);
   const bodyPaddingTop = parseFloat(bodyStyles.paddingTop) || 0;
@@ -416,6 +522,13 @@ function getPatternViewport() {
   return { width, height: viewportHeight };
 }
 
+/**
+ * Estime une grille logique (colonnes/lignes) à partir du nombre cible et du ratio écran.
+ * @param {number} targetCount Nombre de clones visé.
+ * @param {number} viewportWidth Largeur de viewport utilisable.
+ * @param {number} viewportHeight Hauteur de viewport utilisable.
+ * @returns {{cols: number, rows: number}} Grille estimée.
+ */
 function getGridShape(targetCount, viewportWidth, viewportHeight) {
   const aspect = viewportWidth / Math.max(1, viewportHeight);
   const cols = Math.max(4, Math.round(Math.sqrt(targetCount * aspect)));
@@ -423,6 +536,12 @@ function getGridShape(targetCount, viewportWidth, viewportHeight) {
   return { cols, rows };
 }
 
+/**
+ * Distribue un total en quotas entiers pondérés (méthode des restes).
+ * @param {{key: string | number, weight: number}[]} entries Entrées pondérées.
+ * @param {number} totalCount Total à distribuer.
+ * @returns {Map<string | number, number>} Quota final par clé.
+ */
 function buildWeightedQuotaMap(entries, totalCount) {
   const safeEntries = entries.map((entry) => ({
     key: entry.key,
@@ -462,6 +581,12 @@ function buildWeightedQuotaMap(entries, totalCount) {
   return quota;
 }
 
+/**
+ * Sélectionne une clé depuis un quota restant, en tentant d'éviter des exclusions.
+ * @param {Map<string | number, number>} quotaMap Quotas restants par clé.
+ * @param {(string | number)[]} [excludedKeys=[]] Clés à éviter en priorité.
+ * @returns {string | number | null} Clé tirée, ou null si aucun quota disponible.
+ */
 function pickKeyFromQuota(quotaMap, excludedKeys = []) {
   const excluded = new Set(excludedKeys);
 
@@ -488,6 +613,12 @@ function pickKeyFromQuota(quotaMap, excludedKeys = []) {
   return pool[pool.length - 1].key;
 }
 
+/**
+ * Construit un plan de clones (motif + couleur) en respectant les quotas et exclusions locales.
+ * @param {number} cellCount Nombre de clones à planifier.
+ * @param {number} cols Nombre de colonnes de la grille logique.
+ * @returns {{motifIndex: number, colorClass: string}[]} Plan de génération.
+ */
 function buildClonePlan(cellCount, cols) {
   const plan = [];
   const activeColorClasses = getActiveColorClasses();
@@ -558,6 +689,13 @@ function buildClonePlan(cellCount, cols) {
   return plan;
 }
 
+/**
+ * Détecte un conflit de style entre un candidat et ses voisins proches.
+ * @param {{x:number,y:number,width:number,height:number,motifIndex:number,colorClass:string}} candidate Clone candidat.
+ * @param {{x:number,y:number,width:number,height:number,motifIndex:number,colorClass:string}[]} placed Clones déjà placés.
+ * @param {number} adjacencyMultiplier Facteur de rayon de voisinage style.
+ * @returns {boolean} True si conflit (motif/couleur), sinon false.
+ */
 function conflictsWithNearbyStyles(candidate, placed, adjacencyMultiplier) {
   for (let i = 0; i < placed.length; i += 1) {
     const other = placed[i];
@@ -585,6 +723,13 @@ function conflictsWithNearbyStyles(candidate, placed, adjacencyMultiplier) {
   return false;
 }
 
+/**
+ * Vérifie si un clone candidat intersecte un clone déjà placé.
+ * @param {{x:number,y:number,width:number,height:number}} candidate Clone candidat.
+ * @param {{x:number,y:number,width:number,height:number}[]} placed Clones déjà placés.
+ * @param {number} marginRatio Marge relative anti-chevauchement.
+ * @returns {boolean} True si intersection détectée.
+ */
 function intersectsPlaced(candidate, placed, marginRatio) {
   for (let i = 0; i < placed.length; i += 1) {
     const other = placed[i];
@@ -602,6 +747,14 @@ function intersectsPlaced(candidate, placed, marginRatio) {
   return false;
 }
 
+/**
+ * Place les clones dans le viewport via une stratégie pseudo-Poisson contrainte.
+ * @param {HTMLElement[]} clones Clones à placer.
+ * @param {number} viewportWidth Largeur de zone.
+ * @param {number} viewportHeight Hauteur de zone.
+ * @param {{strictNoOverlap?: boolean, enforceStyleAdjacency?: boolean}} [options={}] Options de placement.
+ * @returns {HTMLElement[]} Clones effectivement placés.
+ */
 function placeClonesPoissonConstrained(
   clones,
   viewportWidth,
@@ -693,6 +846,13 @@ function placeClonesPoissonConstrained(
   return placedClones;
 }
 
+/**
+ * Détermine le nombre final de clones selon n, scale, densité et taille d'écran.
+ * @param {number | null | undefined} requestedCloneCount Valeur demandée (n).
+ * @param {number} viewportWidth Largeur de zone.
+ * @param {number} viewportHeight Hauteur de zone.
+ * @returns {number} Nombre de clones retenu.
+ */
 function getBalancedCloneCount(requestedCloneCount, viewportWidth, viewportHeight) {
   if (Number.isFinite(requestedCloneCount) && requestedCloneCount > 0) {
     return Math.max(1, Math.floor(requestedCloneCount));
@@ -733,6 +893,11 @@ function getBalancedCloneCount(requestedCloneCount, viewportWidth, viewportHeigh
   return Math.max(adaptiveMinCount, Math.min(upperBound, targetCount));
 }
 
+/**
+ * Applique les délais d'animation séquencés du motif 1.
+ * @param {HTMLElement} clone Clone motif 1.
+ * @param {number} bloomDelay Délai de départ du cycle.
+ */
 function applyMotif1Sequence(clone, bloomDelay) {
   const svg = clone.querySelector("svg");
   if (!svg) return;
@@ -778,6 +943,11 @@ function applyMotif1Sequence(clone, bloomDelay) {
   if (disc6) disc6.style.animationDelay = `${disc56Delay}s`;
 }
 
+/**
+ * Applique les délais d'animation séquencés du motif 2.
+ * @param {HTMLElement} clone Clone motif 2.
+ * @param {number} bloomDelay Délai de départ du cycle.
+ */
 function applyMotif2Sequence(clone, bloomDelay) {
   const svg = clone.querySelector("svg");
   if (!svg) return;
@@ -811,6 +981,11 @@ function applyMotif2Sequence(clone, bloomDelay) {
   if (disc4) disc4.style.animationDelay = `${disc4Delay}s`;
 }
 
+/**
+ * Applique les délais d'animation séquencés du motif 3.
+ * @param {HTMLElement} clone Clone motif 3.
+ * @param {number} bloomDelay Délai de départ du cycle.
+ */
 function applyMotif3Sequence(clone, bloomDelay) {
   const svg = clone.querySelector("svg");
   if (!svg) return;
@@ -854,6 +1029,11 @@ function applyMotif3Sequence(clone, bloomDelay) {
   if (disc6) disc6.style.animationDelay = `${disc6Delay}s`;
 }
 
+/**
+ * Applique les délais d'animation séquencés du motif 4.
+ * @param {HTMLElement} clone Clone motif 4.
+ * @param {number} bloomDelay Délai de départ du cycle.
+ */
 function applyMotif4Sequence(clone, bloomDelay) {
   const svg = clone.querySelector("svg");
   if (!svg) return;
@@ -886,6 +1066,11 @@ function applyMotif4Sequence(clone, bloomDelay) {
   if (disc3) disc3.style.animationDelay = `${disc3Delay}s`;
 }
 
+/**
+ * Applique les délais d'animation séquencés du motif 5.
+ * @param {HTMLElement} clone Clone motif 5.
+ * @param {number} bloomDelay Délai de départ du cycle.
+ */
 function applyMotif5Sequence(clone, bloomDelay) {
   const svg = clone.querySelector("svg");
   if (!svg) return;
@@ -934,6 +1119,11 @@ function applyMotif5Sequence(clone, bloomDelay) {
   });
 }
 
+/**
+ * Applique les délais d'animation séquencés du motif 6.
+ * @param {HTMLElement} clone Clone motif 6.
+ * @param {number} bloomDelay Délai de départ du cycle.
+ */
 function applyMotif6Sequence(clone, bloomDelay) {
   const svg = clone.querySelector("svg");
   if (!svg) return;
@@ -966,6 +1156,11 @@ function applyMotif6Sequence(clone, bloomDelay) {
   if (disc3) disc3.style.animationDelay = `${discsDelay + disc3Offset}s`;
 }
 
+/**
+ * Réinitialise proprement l'état d'animation d'un clone puis relance sa séquence.
+ * @param {HTMLElement} clone Clone à réinitialiser.
+ * @param {number} motifIndex Index du motif du clone.
+ */
 function resetMotifCycleState(clone, motifIndex) {
   if (!clone || !clone.isConnected) return;
 
@@ -1059,6 +1254,12 @@ function resetMotifCycleState(clone, motifIndex) {
   }
 }
 
+/**
+ * Programme le reset cyclique d'un clone après sa première boucle.
+ * @param {HTMLElement} clone Clone concerné.
+ * @param {number} motifIndex Index du motif.
+ * @param {number} bloomDelay Délai initial de séquence.
+ */
 function scheduleCloneCycleReset(clone, motifIndex, bloomDelay) {
   if (
     motifIndex !== 0 &&
@@ -1084,6 +1285,14 @@ function scheduleCloneCycleReset(clone, motifIndex, bloomDelay) {
   ensureResetScheduler();
 }
 
+/**
+ * Crée et initialise un clone complet (style, séquence, scheduling).
+ * @param {number} index Index global du clone.
+ * @param {number} motifIndex Index du motif source.
+ * @param {number} bloomDelay Délai initial de la séquence.
+ * @param {string} colorClass Classe couleur planifiée.
+ * @returns {HTMLElement} Clone prêt à être placé.
+ */
 function createClone(index, motifIndex, bloomDelay, colorClass) {
   const clone = motifTemplates[motifIndex].cloneNode(true);
   clone.id = `motif-clone-${index}`;
@@ -1123,6 +1332,10 @@ function createClone(index, motifIndex, bloomDelay, colorClass) {
   return clone;
 }
 
+/**
+ * Génère un ensemble de clones et les place dans la zone pattern.
+ * @param {number | null} [count=runtimeConfig.cloneCount] Nombre de clones demandé.
+ */
 function generateRandomMotifs(count = runtimeConfig.cloneCount) {
   clearCycleTimers();
   pattern.innerHTML = "";
@@ -1165,11 +1378,18 @@ function generateRandomMotifs(count = runtimeConfig.cloneCount) {
   placedClones.forEach((clone) => pattern.appendChild(clone));
 }
 
+/**
+ * Affiche la vue multi-motifs (mode principal).
+ */
 function showAllMotifs() {
   pattern.classList.remove("single-view");
   generateRandomMotifs(runtimeConfig.cloneCount);
 }
 
+/**
+ * Affiche un seul motif agrandi au centre.
+ * @param {number} index Index du motif à afficher.
+ */
 function showSingleMotif(index) {
   clearCycleTimers();
   pattern.innerHTML = "";
