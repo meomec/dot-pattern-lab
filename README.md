@@ -10,8 +10,9 @@ Ambiance actuelle : placement intelligent, animation séquencée, contraintes d�
 - séquences de croissance dédiées par motif
 - génération multi-clones avec placement contraint de type Poisson
 - évite les voisins trop proches de même motif
-- évite les voisins de même couleur **sauf noir**
+- évite les voisins de même couleur **sauf noir** (contrainte renforcée en proximité)
 - fréquences pondérées respectées (motifs + couleurs)
+- rotation aléatoire pondérée des clones : `0°` (80%), `+90°` (10%), `-90°` (10%)
 - mode focus (single motif) via le sélecteur
 
 ## 🗂️ Structure
@@ -110,6 +111,12 @@ URL de preview (repo actuel) :
 - Plus de motifs visibles : augmenter `densite` (si `n=0`) ou fixer `n`.
 - Moins de collisions : baisser `densite` ou `scale`.
 - Composition plus sobre : `color=noir`.
+
+## 🆕 Dernières évolutions
+
+- Rotation des motifs pondérée : `0°` majoritaire, quarts de tour plus rares.
+- Fallback de placement non strict sécurisé : plus de placement aléatoire non contraint.
+- Règle anti-adjacence couleur durcie (hors noir) pour éviter les motifs “côte à côte” visuellement.
 
 ---
 

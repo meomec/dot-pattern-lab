@@ -373,6 +373,9 @@ function applyCloneBaseStyle(clone, bloomDelay, colorClass) {
   const randomDuration = cycleDuration * (0.5 + Math.random() * 0.3);
   const randomMirrorX = Math.random() < 0.5;
   const randomMirrorY = Math.random() < 0.5;
+  const randomRotationRoll = Math.random();
+  const randomRotation =
+    randomRotationRoll < 0.8 ? 0 : randomRotationRoll < 0.9 ? 90 : -90;
   const allowMirroring = !clone.classList.contains("motif-type-2");
   const assignedColorClass = colorClass || getWeightedRandomColorClass();
   const width = parseFloat(clone.dataset.dimensionW);
@@ -383,6 +386,7 @@ function applyCloneBaseStyle(clone, bloomDelay, colorClass) {
   clone.style.setProperty("--float-duration", `${randomDuration}s`);
   clone.style.setProperty("--motif-left", "0px");
   clone.style.setProperty("--motif-top", "0px");
+  clone.style.rotate = `${randomRotation}deg`;
   clone.classList.toggle("mirror-x", allowMirroring && randomMirrorX);
   clone.classList.toggle("mirror-y", allowMirroring && randomMirrorY);
   clone.classList.add("color");
@@ -570,7 +574,13 @@ function conflictsWithNearbyStyles(candidate, placed, adjacencyMultiplier) {
     if (candidate.motifIndex === other.motifIndex) return true;
 
     const sameColor = candidate.colorClass === other.colorClass;
-    if (sameColor && candidate.colorClass !== "black") return true;
+    if (sameColor && candidate.colorClass !== "black") {
+      const sameColorMinDx = ((candidate.width + other.width) / 2) * 1.08;
+      const sameColorMinDy = ((candidate.height + other.height) / 2) * 1.08;
+      if (Math.abs(dx) < sameColorMinDx && Math.abs(dy) < sameColorMinDy) {
+        return true;
+      }
+    }
   }
   return false;
 }
@@ -649,14 +659,21 @@ function placeClonesPoissonConstrained(
     }
 
     if (!selectedPoint && !strictNoOverlap) {
-      selectedPoint = {
-        x: minX + Math.random() * (maxX - minX || 1),
-        y: minY + Math.random() * (maxY - minY || 1),
-        width,
-        height,
-        motifIndex,
-        colorClass,
-      };
+      for (let attempt = 0; attempt < attemptsPerLevel; attempt += 1) {
+        const x = minX + Math.random() * (maxX - minX || 1);
+        const y = minY + Math.random() * (maxY - minY || 1);
+        const candidate = { x, y, width, height, motifIndex, colorClass };
+
+        if (intersectsPlaced(candidate, placed, 0)) continue;
+        if (
+          enforceStyleAdjacency &&
+          conflictsWithNearbyStyles(candidate, placed, 0.55)
+        )
+          continue;
+
+        selectedPoint = candidate;
+        break;
+      }
     }
 
     if (!selectedPoint) {
