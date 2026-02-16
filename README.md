@@ -97,7 +97,7 @@ Tous les réglages sont runtime via query params.
 
 URL de preview (repo actuel) :
 
-`https://meomec.github.io/Dot_pattern/eames.html?scale=0.75`
+`https://meomec.github.io/dot-pattern-lab/eames.html?scale=0.75`
 
 ## 🧠 Logique de génération (résumé)
 
