@@ -95,7 +95,7 @@ Tous les réglages sont runtime via query params.
 
 URL de preview (repo actuel) :
 
-`https://meomec.github.io/dot-pattern-lab/eames.html?controls=1`
+[Ouvrir la preview](https://meomec.github.io/dot-pattern-lab/eames.html?controls=1)
 
 ## 🧠 Logique de génération (résumé)
 
