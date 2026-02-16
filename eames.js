@@ -413,34 +413,6 @@ function buildClonePlan(cellCount, cols) {
   return plan;
 }
 
-function placeClonesInGrid(clones, cols, rows, viewportWidth, viewportHeight) {
-  const cellWidth = viewportWidth / cols;
-  const cellHeight = viewportHeight / rows;
-
-  clones.forEach((clone, index) => {
-    const col = index % cols;
-    const row = Math.floor(index / cols);
-    const width = parseFloat(clone.style.width) || 80;
-    const height = parseFloat(clone.style.height) || 80;
-
-    const centerX = (col + 0.5) * cellWidth;
-    const centerY = (row + 0.5) * cellHeight;
-    const jitterX = (Math.random() - 0.5) * Math.min(24, cellWidth * 0.22);
-    const jitterY = (Math.random() - 0.5) * Math.min(24, cellHeight * 0.22);
-
-    const minX = width / 2;
-    const maxX = Math.max(minX, viewportWidth - width / 2);
-    const minY = height / 2;
-    const maxY = Math.max(minY, viewportHeight - height / 2);
-
-    const x = Math.max(minX, Math.min(maxX, centerX + jitterX));
-    const y = Math.max(minY, Math.min(maxY, centerY + jitterY));
-
-    clone.style.setProperty("--motif-left", `${x}px`);
-    clone.style.setProperty("--motif-top", `${y}px`);
-  });
-}
-
 function conflictsWithNearbyStyles(candidate, placed, adjacencyMultiplier) {
   for (let i = 0; i < placed.length; i += 1) {
     const other = placed[i];
