@@ -33,7 +33,20 @@ Ambiance actuelle : placement intelligent, animation séquencée, contraintes d�
 
 1. Ouvrir `eames.html` dans un navigateur.
 2. Utiliser le sélecteur en haut à droite (`Tous les motifs` / `Motif X`).
-3. Ajuster les paramètres via l’URL pour piloter le rendu.
+3. Ajuster les paramètres via le panneau de contrôle (application automatique) ou via l’URL.
+
+## 🎛️ Panneau de contrôle
+
+Le panneau intègre les mêmes options que les query params :
+
+- `N` (nombre de clones)
+- `Échelle` (`scale`)
+- `Densite` (`density`)
+- `Mode` (radio : `couleur` / `n&b`)
+- `debug`
+- `controls`
+
+Chaque changement est appliqué automatiquement (pas de bouton “Appliquer”).
 
 ## 🔧 Paramètres URL
 
@@ -45,7 +58,7 @@ Tous les réglages sont runtime via query params.
 - `n>0` → **override strict** du nombre de clones
 - si absent/invalide → mode auto
 
-### `densite` (alias `density`)
+### `density` (alias `densite`)
 
 - borne : `0` à `1.2`
 - défaut : `0`
@@ -55,6 +68,7 @@ Tous les réglages sont runtime via query params.
 ### `scale` (alias legacy `gridScale`)
 
 - borne : `0.05` à `1.2`
+- défaut : `0.75`
 - ajuste la taille des clones
 
 ### `color` (aliases legacy `colorMode`, `couleur`)
@@ -79,6 +93,12 @@ Tous les réglages sont runtime via query params.
 - Forcé à 140 clones : `?n=140&scale=0.22&color=color`
 - Noir uniquement + contrôles visibles : `?color=noir&controls=1`
 
+## 🌐 Preview GitHub Pages
+
+URL de preview (repo actuel) :
+
+`https://meomec.github.io/Dot_pattern/eames.html?scale=0.75`
+
 ## 🧠 Logique de génération (résumé)
 
 1. Calcul du nombre cible (`getBalancedCloneCount`) selon viewport, scale, densité, mode auto/forcé.
@@ -96,6 +116,3 @@ Tous les réglages sont runtime via query params.
 ---
 
 Have fun 🌈🫧
-
-
-https://meomec.github.io/Dot_pattern/eames.html?scale=0.75
