@@ -29,6 +29,107 @@ const colorFrequencies = {
   black: 0.4,
 };
 const colorClasses = Object.keys(colorFrequencies);
+let debugCloneTooltip = null;
+
+function ensureDebugCloneTooltip() {
+  if (debugCloneTooltip && debugCloneTooltip.isConnected) {
+    return debugCloneTooltip;
+  }
+
+  const tooltip = document.createElement("div");
+  tooltip.id = "clone-debug-tooltip";
+  tooltip.style.position = "fixed";
+  tooltip.style.top = "0";
+  tooltip.style.left = "0";
+  tooltip.style.zIndex = "9999";
+  tooltip.style.display = "none";
+  tooltip.style.pointerEvents = "none";
+  tooltip.style.whiteSpace = "pre";
+  tooltip.style.padding = "8px 10px";
+  tooltip.style.borderRadius = "4px";
+  tooltip.style.background = "rgba(10, 10, 10, 0.9)";
+  tooltip.style.color = "#fff";
+  tooltip.style.fontFamily = "Menlo, Monaco, Consolas, monospace";
+  tooltip.style.fontSize = "11px";
+  tooltip.style.lineHeight = "1.35";
+  tooltip.style.maxWidth = "320px";
+  tooltip.style.boxShadow = "0 8px 28px rgba(0,0,0,0.28)";
+
+  document.body.appendChild(tooltip);
+  debugCloneTooltip = tooltip;
+  return tooltip;
+}
+
+function hideDebugCloneTooltip() {
+  if (!debugCloneTooltip) return;
+  debugCloneTooltip.style.display = "none";
+}
+
+function moveDebugCloneTooltip(event) {
+  if (!debugCloneTooltip) return;
+  const offset = 14;
+  const margin = 10;
+  const tooltipRect = debugCloneTooltip.getBoundingClientRect();
+  const maxX = Math.max(margin, window.innerWidth - tooltipRect.width - margin);
+  const maxY = Math.max(margin, window.innerHeight - tooltipRect.height - margin);
+  const x = Math.min(maxX, Math.max(margin, event.clientX + offset));
+  const y = Math.min(maxY, Math.max(margin, event.clientY + offset));
+  debugCloneTooltip.style.transform = `translate(${x}px, ${y}px)`;
+}
+
+function getCloneDebugLines(clone) {
+  const motifIndex = parseInt(clone.dataset.motifIndex || "-1", 10);
+  const motifNumber = Number.isFinite(motifIndex) && motifIndex >= 0 ? motifIndex + 1 : "?";
+  const colorClass =
+    clone.dataset.colorClass ||
+    colorClasses.find((colorClassName) => clone.classList.contains(colorClassName)) ||
+    "unknown";
+
+  const leftRaw = clone.style.getPropertyValue("--motif-left") || "0px";
+  const topRaw = clone.style.getPropertyValue("--motif-top") || "0px";
+  const bloomDelay = clone.style.getPropertyValue("--bloom-delay") || "0s";
+  const animationDelay = clone.style.getPropertyValue("--animation-delay") || "0s";
+  const floatDuration = clone.style.getPropertyValue("--float-duration") || "0s";
+  const width = clone.style.width || `${Math.round(clone.getBoundingClientRect().width)}px`;
+  const height = clone.style.height || `${Math.round(clone.getBoundingClientRect().height)}px`;
+  const rotation = clone.style.rotate || "0deg";
+
+  return [
+    `id: ${clone.id || "(sans id)"}`,
+    `motif: ${motifNumber} (index ${motifIndex})`,
+    `color: ${colorClass}`,
+    `size: ${width} × ${height}`,
+    `pos: ${leftRaw}, ${topRaw}`,
+    `bloomDelay: ${bloomDelay}`,
+    `animDelay: ${animationDelay}`,
+    `floatDuration: ${floatDuration}`,
+    `rotation: ${rotation}`,
+    `mirrorX: ${clone.classList.contains("mirror-x") ? "yes" : "no"}`,
+    `mirrorY: ${clone.classList.contains("mirror-y") ? "yes" : "no"}`,
+  ];
+}
+
+function bindCloneDebugHover(clone) {
+  if (!clone || clone.dataset.debugHoverBound === "1") return;
+  clone.dataset.debugHoverBound = "1";
+
+  clone.addEventListener("mouseenter", (event) => {
+    if (!runtimeConfig.debugPlacement) return;
+    const tooltip = ensureDebugCloneTooltip();
+    tooltip.textContent = getCloneDebugLines(clone).join("\n");
+    tooltip.style.display = "block";
+    moveDebugCloneTooltip(event);
+  });
+
+  clone.addEventListener("mousemove", (event) => {
+    if (!runtimeConfig.debugPlacement) return;
+    moveDebugCloneTooltip(event);
+  });
+
+  clone.addEventListener("mouseleave", () => {
+    hideDebugCloneTooltip();
+  });
+}
 
 /**
  * Parse le paramètre URL n (nombre de clones) avec validation.
@@ -128,9 +229,11 @@ function setControlsVisibility() {
 function setDebugMode() {
   if (runtimeConfig.debugPlacement) {
     document.body.dataset.debugPlacement = "true";
+    ensureDebugCloneTooltip();
     return;
   }
   delete document.body.dataset.debugPlacement;
+  hideDebugCloneTooltip();
 }
 
 /**
@@ -500,6 +603,9 @@ function applyCloneBaseStyle(clone, bloomDelay, colorClass) {
   if (runtimeConfig.debugPlacement) {
     clone.style.outline = "1px dashed rgba(0,0,0,0.35)";
     clone.style.outlineOffset = "2px";
+  } else {
+    clone.style.outline = "";
+    clone.style.outlineOffset = "";
   }
 }
 
@@ -840,6 +946,8 @@ function placeClonesPoissonConstrained(
 
     if (runtimeConfig.debugPlacement) {
       clone.title = `motif:${motifIndex + 1} | color:${colorClass} | x:${Math.round(selectedPoint.x)} y:${Math.round(selectedPoint.y)}`;
+    } else {
+      clone.removeAttribute("title");
     }
   });
 
@@ -1302,6 +1410,7 @@ function createClone(index, motifIndex, bloomDelay, colorClass) {
   clone.dataset.colorClass = colorClass || "";
 
   applyCloneBaseStyle(clone, bloomDelay, colorClass);
+  bindCloneDebugHover(clone);
 
   if (motifIndex === 0 || clone.classList.contains("motif-type-1")) {
     applyMotif1Sequence(clone, bloomDelay);
@@ -1409,6 +1518,7 @@ function showSingleMotif(index) {
   clone.style.setProperty("--float-duration", "8s");
   clone.style.setProperty("--motif-left", "0px");
   clone.style.setProperty("--motif-top", "0px");
+  bindCloneDebugHover(clone);
 
   if (index === 0) {
     applyMotif1Sequence(clone, bloomDelay);
