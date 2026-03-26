@@ -11,6 +11,7 @@ const colorModeInputs = Array.from(
 );
 const debugInput = document.getElementById("debug-input");
 const controlsCloseButton = document.getElementById("controls-close");
+const controlsOpenButton = document.getElementById("controls-open");
 const audioPlayButton = document.getElementById("audio-play");
 const audioStopButton = document.getElementById("audio-stop");
 const audioMuteButton = document.getElementById("audio-mute");
@@ -288,6 +289,7 @@ const runtimeConfig = {
 function setControlsVisibility() {
   const visibility = runtimeConfig.controlsVisibility;
   document.getElementById("controls")?.classList.toggle("on", visibility);
+  controlsOpenButton?.classList.toggle("visible", !visibility);
 }
 
 /**
@@ -440,6 +442,14 @@ function bindControlsAutoApply() {
   if (controlsCloseButton) {
     controlsCloseButton.addEventListener("click", () => {
       runtimeConfig.controlsVisibility = false;
+      setControlsVisibility();
+      syncQueryFromRuntime();
+    });
+  }
+
+  if (controlsOpenButton) {
+    controlsOpenButton.addEventListener("click", () => {
+      runtimeConfig.controlsVisibility = true;
       setControlsVisibility();
       syncQueryFromRuntime();
     });

@@ -29,6 +29,30 @@ body {
   display: block;
 }
 
+.controls-open {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 101;
+  border: 1px solid #ccc;
+  background: white;
+  color: #333;
+  font-size: 16px;
+  line-height: 1;
+  padding: 7px 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+.controls-open.visible {
+  display: block;
+}
+
+.controls-open:hover {
+  border-color: #999;
+}
+
 .controls-close {
   position: absolute;
   top: 0px;
