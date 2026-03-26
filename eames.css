@@ -29,19 +29,33 @@ body {
   display: block;
 }
 
+.controls-edge-trigger {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 100vh;
+  z-index: 100;
+  background: transparent;
+  display: none;
+}
+
 .controls-open {
   position: fixed;
   top: 20px;
-  right: 20px;
+  right: 0px;
   z-index: 101;
-  border: 1px solid #ccc;
-  background: white;
-  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  color: #444;
   font-size: 16px;
   line-height: 1;
   padding: 7px 10px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  transform: translateX(85%);
+  transition: transform 160ms ease, opacity 160ms ease, border-color 160ms ease;
   display: none;
 }
 
@@ -49,8 +63,38 @@ body {
   display: block;
 }
 
-.controls-open:hover {
-  border-color: #999;
+@media (hover: hover) and (pointer: fine) {
+  .controls-edge-trigger {
+    display: block;
+  }
+
+  .controls-edge-trigger:hover + .controls-open.visible,
+  .controls-open.visible:hover,
+  .controls-open.visible:focus-visible,
+  .controls-open.visible:active {
+    transform: translateX(0);
+    opacity: 0.85;
+    border-color: #999;
+    pointer-events: auto;
+  }
+
+  .controls-open.visible {
+    pointer-events: none;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .controls-edge-trigger {
+    display: none;
+  }
+
+  .controls-open {
+    right: 12px;
+    transform: none;
+    opacity: 0.72;
+    padding: 10px 12px;
+    pointer-events: auto;
+  }
 }
 
 .controls-close {
