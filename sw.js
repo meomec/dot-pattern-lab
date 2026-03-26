@@ -69,8 +69,45 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (request.headers.has("range")) {
+    event.respondWith(handleRangeRequest(request));
+    return;
+  }
+
   event.respondWith(handleAssetRequest(request));
 });
+
+async function handleRangeRequest(request) {
+  const cachedResponse = await caches.match(request.url);
+
+  if (!cachedResponse) {
+    try {
+      return await fetch(request);
+    } catch {
+      return Response.error();
+    }
+  }
+
+  const rangeHeader = request.headers.get("range");
+  const buffer = await cachedResponse.arrayBuffer();
+  const total = buffer.byteLength;
+
+  const [, startStr, endStr] = /bytes=(\d*)-(\d*)/.exec(rangeHeader) || [];
+  const start = startStr ? parseInt(startStr, 10) : 0;
+  const end = endStr ? parseInt(endStr, 10) : total - 1;
+  const slice = buffer.slice(start, end + 1);
+
+  return new Response(slice, {
+    status: 206,
+    statusText: "Partial Content",
+    headers: {
+      "Content-Type": cachedResponse.headers.get("Content-Type") || "audio/mpeg",
+      "Content-Range": `bytes ${start}-${end}/${total}`,
+      "Content-Length": String(slice.byteLength),
+      "Accept-Ranges": "bytes",
+    },
+  });
+}
 
 async function handleNavigationRequest(request) {
   const runtimeCache = await caches.open(RUNTIME_CACHE_NAME);
