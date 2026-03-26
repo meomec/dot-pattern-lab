@@ -93,9 +93,51 @@ function registerServiceWorker() {
   if (!window.isSecureContext) return;
 
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch((error) => {
-      console.error("Service worker registration failed", error);
+    let hasRefreshedAfterSwUpdate = false;
+
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (hasRefreshedAfterSwUpdate) return;
+      hasRefreshedAfterSwUpdate = true;
+      window.location.reload();
     });
+
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then((registration) => {
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: "SKIP_WAITING" });
+        }
+
+        registration.addEventListener("updatefound", () => {
+          const installing = registration.installing;
+          if (!installing) return;
+
+          installing.addEventListener("statechange", () => {
+            if (
+              installing.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              installing.postMessage({ type: "SKIP_WAITING" });
+            }
+          });
+        });
+
+        const triggerUpdateCheck = () => {
+          registration.update().catch(() => {
+            /* ignore update check errors */
+          });
+        };
+
+        window.setInterval(triggerUpdateCheck, 60 * 1000);
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") {
+            triggerUpdateCheck();
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Service worker registration failed", error);
+      });
   });
 }
 
