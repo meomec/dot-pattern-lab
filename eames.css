@@ -105,6 +105,31 @@ body {
   border-color: #999;
 }
 
+.audio-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.audio-btn {
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1;
+  color: #333;
+}
+
+.audio-btn:hover {
+  border-color: #999;
+}
+
+.audio-btn.active {
+  background: #111;
+  color: white;
+  border-color: #111;
+}
+
 .pattern {
   position: relative;
   min-height: 100vh;
@@ -194,10 +219,6 @@ body {
 .color.black {
   color: #151515;
 }
-
-
-
-
 
 
 /* =========================

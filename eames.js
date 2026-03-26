@@ -11,6 +11,11 @@ const colorModeInputs = Array.from(
 );
 const debugInput = document.getElementById("debug-input");
 const controlsCloseButton = document.getElementById("controls-close");
+const audioPlayButton = document.getElementById("audio-play");
+const audioStopButton = document.getElementById("audio-stop");
+const audioMuteButton = document.getElementById("audio-mute");
+const audioVolumeInput = document.getElementById("audio-volume-input");
+const audioVolumeValue = document.getElementById("audio-volume-value");
 const pattern = document.querySelector(".pattern");
 const motifTemplates = Array.from(document.querySelectorAll(".motif"));
 const frequencies = motifTemplates.map(
@@ -30,6 +35,57 @@ const colorFrequencies = {
 };
 const colorClasses = Object.keys(colorFrequencies);
 let debugCloneTooltip = null;
+
+const audioPlayer = (() => {
+  const audio = new Audio("./mp3/Isan_Trois_Gymnopedies_No1_Lent_et_Douloureux_128k.mp3");
+  audio.loop = true;
+  audio.volume = 0.7;
+
+  function syncUI() {
+    if (!audioPlayButton || !audioStopButton || !audioMuteButton) return;
+    const playing = !audio.paused;
+    audioPlayButton.textContent = playing ? "⏸" : "▶";
+    audioPlayButton.setAttribute("aria-label", playing ? "Pause" : "Lire");
+    audioPlayButton.classList.toggle("active", playing);
+    audioMuteButton.textContent = audio.muted ? "🔇" : "🔊";
+    audioMuteButton.classList.toggle("active", audio.muted);
+    if (audioVolumeValue) {
+      audioVolumeValue.textContent = `${Math.round(audio.volume * 100)}%`;
+    }
+  }
+
+  function bindControls() {
+    if (!audioPlayButton) return;
+
+    audioPlayButton.addEventListener("click", () => {
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+      }
+      syncUI();
+    });
+
+    audioStopButton?.addEventListener("click", () => {
+      audio.pause();
+      audio.currentTime = 0;
+      syncUI();
+    });
+
+    audioMuteButton?.addEventListener("click", () => {
+      audio.muted = !audio.muted;
+      syncUI();
+    });
+
+    audioVolumeInput?.addEventListener("input", () => {
+      audio.volume = parseFloat(audioVolumeInput.value);
+      audio.muted = false;
+      syncUI();
+    });
+  }
+
+  return { bindControls, syncUI };
+})();
 
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
@@ -223,7 +279,7 @@ const runtimeConfig = {
       queryParams.get("couleur"),
   ),
   debugPlacement: parseBooleanQuery(queryParams.get("debug"), false),
-  controlsVisibility: parseBooleanQuery(queryParams.get("controls"), false),
+  controlsVisibility: parseBooleanQuery(queryParams.get("controls"), true),
 };
 
 /**
@@ -1574,6 +1630,8 @@ selector.addEventListener("change", (event) => {
 
 window.addEventListener("DOMContentLoaded", () => {
   registerServiceWorker();
+  audioPlayer.bindControls();
+  audioPlayer.syncUI();
   syncControlsInputsFromRuntime();
   setDebugMode();
   setControlsVisibility();

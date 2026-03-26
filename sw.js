@@ -21,6 +21,7 @@ const PRECACHE_URLS = [
   "./svg/eames_04.svg",
   "./svg/eames_05.svg",
   "./svg/eames_06.svg",
+  "./mp3/Isan_Trois_Gymnopedies_No1_Lent_et_Douloureux_128k.mp3",
 ];
 const PRECACHE_KEYS = new Set(
   PRECACHE_URLS.map((url) => new URL(url, self.location.href).toString()),

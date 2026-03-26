@@ -59,6 +59,19 @@
 				<label for="debug-input">Debug</label>
 				<input id="debug-input" type="checkbox">
 
+				<label>Son</label>
+				<div class="audio-controls">
+					<button id="audio-play" type="button" class="audio-btn" aria-label="Lire">▶</button>
+					<button id="audio-stop" type="button" class="audio-btn" aria-label="Arrêter">⏹</button>
+					<button id="audio-mute" type="button" class="audio-btn" aria-label="Couper le son">🔊</button>
+				</div>
+
+				<label for="audio-volume-input">Volume</label>
+				<div class="range-control">
+					<input id="audio-volume-input" type="range" min="0" max="1" step="0.05" value="0.7">
+					<output id="audio-volume-value" for="audio-volume-input"></output>
+				</div>
+
 			</div>
 		</div>
 
