@@ -27,6 +27,10 @@ Ambiance actuelle : placement intelligent, animation séquencée, contraintes d�
   - scheduler global de reset
   - quotas / contraintes / placement
   - parsing des paramètres URL
+- `sw.js`
+  - service worker pour cache hors ligne et fallback de navigation
+- `offline.html`
+  - page de secours affichée si une navigation échoue sans réseau
 - `svg/eames_00.svg` → `svg/eames_06.svg`
   - sources SVG externes de référence
 
@@ -34,6 +38,20 @@ Ambiance actuelle : placement intelligent, animation séquencée, contraintes d�
 
 1. Ouvrir `eames.html` dans un navigateur.
 2. Ajuster les paramètres via le panneau de contrôle (application automatique) ou via l’URL.
+
+Pour les fonctions PWA et le mode hors connexion, il faut servir le dossier en HTTP(S) local ou distant.
+
+Exemple simple en local :
+
+```bash
+python3 -m http.server 8000
+```
+
+Puis ouvrir :
+
+```text
+http://localhost:8000/eames.html
+```
 
 ## 🎛️ Panneau de contrôle
 
@@ -97,6 +115,29 @@ Tous les réglages sont runtime via query params.
 URL de preview (repo actuel) :
 
 [Ouvrir la preview](https://meomec.github.io/dot-pattern-lab/eames.html?controls=1)
+
+## 📦 PWA et hors connexion
+
+- le manifest est servi depuis `favicon/site.webmanifest`
+- le service worker `sw.js` pré-cache le shell de l’application
+- `offline.html` sert de fallback si une navigation échoue hors ligne
+- les assets demandés ensuite sont stockés dans un cache runtime
+
+### Stratégie de mise à jour
+
+- le service worker n’utilise plus de suffixe de version manuel pour ses caches
+- à chaque mise à jour du fichier `sw.js`, le navigateur installe un nouveau worker
+- le cache de préchargement est resynchronisé automatiquement avec la liste `PRECACHE_URLS`
+- les anciennes entrées de pré-cache qui ne font plus partie de cette liste sont supprimées à l’activation
+
+### Vérifier le mode hors ligne
+
+1. ouvrir l’application via un serveur local ou GitHub Pages
+2. charger une première fois `eames.html` avec réseau actif
+3. vérifier dans les DevTools que le service worker est bien installé
+4. couper le réseau dans le navigateur
+5. recharger `eames.html` pour confirmer que l’application reste disponible
+6. tester une navigation non disponible en cache pour vérifier l’affichage de `offline.html`
 
 ## 🧠 Logique de génération (résumé)
 

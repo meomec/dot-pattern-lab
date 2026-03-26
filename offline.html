@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hors connexion - Charles Eames</title>
+    <meta name="theme-color" content="#f3efe7">
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f3efe7;
+        --panel: rgba(255, 252, 247, 0.92);
+        --ink: #17202a;
+        --muted: #566573;
+        --accent: #c22b2b;
+        --line: rgba(23, 32, 42, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(circle at top left, rgba(194, 43, 43, 0.08), transparent 30%),
+          radial-gradient(circle at bottom right, rgba(15, 45, 142, 0.08), transparent 28%),
+          linear-gradient(180deg, #f8f4ec 0%, var(--bg) 100%);
+        color: var(--ink);
+        font-family: Georgia, "Times New Roman", serif;
+      }
+
+      main {
+        width: min(100%, 640px);
+        padding: 32px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: 0 18px 60px rgba(23, 32, 42, 0.08);
+      }
+
+      p {
+        margin: 0;
+        line-height: 1.6;
+        font-size: 1.05rem;
+        color: var(--muted);
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 14px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font: 600 0.75rem/1.2 Arial, sans-serif;
+        color: var(--accent);
+      }
+
+      h1 {
+        margin: 0 0 14px;
+        font-size: clamp(2rem, 5vw, 3.6rem);
+        line-height: 0.95;
+        font-weight: 600;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 26px;
+      }
+
+      a,
+      button {
+        appearance: none;
+        border: 1px solid var(--ink);
+        background: transparent;
+        color: var(--ink);
+        padding: 12px 16px;
+        font: 600 0.95rem/1 Arial, sans-serif;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .primary {
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .motif-line {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(24px, 1fr));
+        gap: 10px;
+        margin-top: 28px;
+      }
+
+      .motif-line span {
+        aspect-ratio: 1;
+        border-radius: 999px;
+        background: currentColor;
+        opacity: 0.9;
+      }
+
+      .motif-line span:nth-child(1) { color: #cc8f3c; }
+      .motif-line span:nth-child(2) { color: #c22b2b; }
+      .motif-line span:nth-child(3) { color: #0f2d8e; }
+      .motif-line span:nth-child(4) { color: #829658; }
+      .motif-line span:nth-child(5) { color: #325042; }
+      .motif-line span:nth-child(6) { color: #151515; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="eyebrow">Mode hors connexion</span>
+      <h1>La connexion est indisponible.</h1>
+      <p>
+        L'application a garde ses ressources principales en cache, mais la page demandee
+        n'etait pas disponible localement. Reessaie des que le reseau revient.
+      </p>
+      <div class="actions">
+        <a class="primary" href="./eames.html">Ouvrir l'application</a>
+        <button type="button" id="retry-button">Reessayer</button>
+      </div>
+      <div class="motif-line" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </main>
+    <script>
+      document.getElementById("retry-button")?.addEventListener("click", () => {
+        window.location.reload();
+      });
+    </script>
+  </body>
+</html>

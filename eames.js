@@ -31,6 +31,17 @@ const colorFrequencies = {
 const colorClasses = Object.keys(colorFrequencies);
 let debugCloneTooltip = null;
 
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  if (!window.isSecureContext) return;
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error) => {
+      console.error("Service worker registration failed", error);
+    });
+  });
+}
+
 function ensureDebugCloneTooltip() {
   if (debugCloneTooltip && debugCloneTooltip.isConnected) {
     return debugCloneTooltip;
@@ -1562,6 +1573,7 @@ selector.addEventListener("change", (event) => {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
+  registerServiceWorker();
   syncControlsInputsFromRuntime();
   setDebugMode();
   setControlsVisibility();
