@@ -12,6 +12,10 @@ body {
   font-family: Arial, sans-serif;
 }
 
+body.inverse {
+  filter: invert(100%);
+}
+
 .controls {
   display: none;
   position: fixed;
@@ -205,6 +209,11 @@ body {
   overflow: hidden;
 }
 
+.pattern.inverse {
+  filter: invert(100%);
+  background-color: #000;
+}
+
 .pattern.single-view {
   display: flex;
   justify-content: center;
@@ -286,6 +295,10 @@ body {
 
 .color.black {
   color: #151515;
+}
+
+.color.white {
+  color: #f9f9f9 !important;
 }
 
 

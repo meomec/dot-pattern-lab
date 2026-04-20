@@ -10,6 +10,7 @@ const colorModeInputs = Array.from(
   document.querySelectorAll('input[name="color-mode-input"]'),
 );
 const debugInput = document.getElementById("debug-input");
+const invertInput = document.getElementById("invert-input");
 const controlsCloseButton = document.getElementById("controls-close");
 const controlsOpenButton = document.getElementById("controls-open");
 const audioPlayButton = document.getElementById("audio-play");
@@ -322,6 +323,10 @@ const runtimeConfig = {
       queryParams.get("couleur"),
   ),
   debugPlacement: parseBooleanQuery(queryParams.get("debug"), false),
+  invertColors: parseBooleanQuery(
+    queryParams.get("invert") || queryParams.get("inverse"),
+    false,
+  ),
   controlsVisibility: parseBooleanQuery(queryParams.get("controls"), true),
 };
 
@@ -345,6 +350,15 @@ function setDebugMode() {
   }
   delete document.body.dataset.debugPlacement;
   hideDebugCloneTooltip();
+}
+
+/**
+ * Active ou désactive l'inversion globale des couleurs.
+ */
+function setInvertMode() {
+  const isInverse = Boolean(runtimeConfig.invertColors);
+  document.body.classList.toggle("inverse", isInverse);
+  pattern?.classList.toggle("inverse", isInverse);
 }
 
 /**
@@ -397,6 +411,10 @@ function syncControlsInputsFromRuntime() {
     debugInput.checked = runtimeConfig.debugPlacement;
   }
 
+  if (invertInput) {
+    invertInput.checked = runtimeConfig.invertColors;
+  }
+
   syncRangeValueDisplays();
 
 }
@@ -414,6 +432,8 @@ function syncQueryFromRuntime() {
   params.set("color", runtimeConfig.colorMode);
   params.delete("colorMode");
   params.set("debug", runtimeConfig.debugPlacement ? "1" : "0");
+  params.set("invert", runtimeConfig.invertColors ? "1" : "0");
+  params.delete("inverse");
   params.set("controls", runtimeConfig.controlsVisibility ? "1" : "0");
 
   const queryString = params.toString();
@@ -445,10 +465,12 @@ function applyRuntimeConfigFromControls() {
   runtimeConfig.density = parseDensity(densityInput.value, DEFAULT_DENSITY);
   runtimeConfig.colorMode = parseColorMode(selectedColorModeInput?.value);
   runtimeConfig.debugPlacement = Boolean(debugInput?.checked);
+  runtimeConfig.invertColors = Boolean(invertInput?.checked);
 
   syncRangeValueDisplays();
   syncControlsInputsFromRuntime();
   setDebugMode();
+  setInvertMode();
   setControlsVisibility();
   syncQueryFromRuntime();
 
@@ -470,6 +492,7 @@ function bindControlsAutoApply() {
     gridScaleInput,
     densityInput,
     debugInput,
+    invertInput,
     ...colorModeInputs,
   ].filter(Boolean);
 
@@ -715,7 +738,11 @@ function applyCloneBaseStyle(clone, bloomDelay, colorClass) {
   clone.classList.toggle("mirror-y", allowMirroring && randomMirrorY);
   clone.classList.add("color");
   clone.classList.remove(...colorClasses);
+  clone.classList.remove("white");
   clone.classList.add(assignedColorClass);
+  if (runtimeConfig.invertColors && assignedColorClass === "black") {
+    clone.classList.add("white");
+  }
   clone.style.width = `${width * runtimeConfig.gridScale}px`;
   clone.style.height = `${height * runtimeConfig.gridScale}px`;
 
@@ -1686,6 +1713,7 @@ window.addEventListener("DOMContentLoaded", () => {
   audioPlayer.syncUI();
   syncControlsInputsFromRuntime();
   setDebugMode();
+  setInvertMode();
   setControlsVisibility();
   showAllMotifs();
   bindControlsAutoApply();
